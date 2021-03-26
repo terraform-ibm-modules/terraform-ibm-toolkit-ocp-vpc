@@ -1,0 +1,16 @@
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Publish repository dispatch
+        uses: ibm-garage-cloud/action-repository-dispatch@main
+        with:
+          notifyRepo: ibm-garage-cloud/ibm-garage-iteration-zero
+          eventType: released
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
