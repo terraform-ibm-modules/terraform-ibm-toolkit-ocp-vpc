@@ -30,12 +30,18 @@ locals {
   }
 }
 
-data ibm_container_cluster_config cluster {
-  depends_on        = [ibm_container_vpc_cluster.cluster]
-
+resource "null_resource" "list_tmp" {
   triggers = {
     always_run = timestamp()
   }
+
+  provisioner "local-exec" {
+    command = "ls ${local.tmp_dir}"
+  }
+}
+
+data ibm_container_cluster_config cluster {
+  depends_on        = [ibm_container_vpc_cluster.cluster, null_resource.list_tmp]
 
   cluster_name_id   = local.cluster_name
   resource_group_id = data.ibm_resource_group.resource_group.id
