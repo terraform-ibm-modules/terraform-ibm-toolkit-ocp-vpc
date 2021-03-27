@@ -108,7 +108,7 @@ resource "ibm_container_vpc_cluster" "cluster" {
   count = !var.exists ? 1 : 0
 
   name              = local.cluster_name
-  vpc_id            = data.ibm_is_vpc.vpc.id
+  vpc_id            = data.ibm_is_vpc.vpc[0].id
   flavor            = var.flavor
   worker_count      = var.worker_count
   kube_version      = local.cluster_version
@@ -119,7 +119,7 @@ resource "ibm_container_vpc_cluster" "cluster" {
 
   zones {
     name      = "${var.region}-1"
-    subnet_id = data.ibm_is_vpc[0].subnets[0].id
+    subnet_id = data.ibm_is_vpc.vpc[0].subnets[0].id
   }
 }
 
