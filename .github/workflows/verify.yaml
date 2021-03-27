@@ -13,11 +13,11 @@ jobs:
   verify:
     if: ${{ !contains( github.event.pull_request.labels.*.name, 'skip ci' ) }}
     runs-on: ubuntu-latest
-    container: quay.io/ibmgaragecloud/cli-tools:v0.10.0-lite
+    container: quay.io/ibmgaragecloud/cli-tools:v0.12.0-lite
 
     strategy:
       matrix:
-        platform: [ocp4_latest]
+        platform: [ocp4vpc_latest]
       #      max-parallel: 1
       fail-fast: false
 

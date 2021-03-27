@@ -48,3 +48,24 @@ variable "vpc_cluster" {
   description = "Flag indicating that this is a vpc cluster"
   default     = false
 }
+
+variable "vpc_public_gateway" {
+  type        = string
+  description = "Flag indicating the public gateway should be created"
+  default     = "true"
+}
+
+variable "subnet_count" {
+  type        = number
+  default     = 2
+}
+
+variable "worker_count" {
+  type        = number
+  default     = 1
+}
+
+variable "ocp_version" {
+  type        = string
+  default     = "4.6"
+}
