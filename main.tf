@@ -33,7 +33,7 @@ locals {
   substr(version, 0, 3) => "${version}_openshift"
   }
   cluster_regex         = "(${join("|", keys(local.config_values))}|ocp4).*"
-  cluster_type_cleaned  = regex(local.cluster_regex, var.cluster_type)[0] == "ocp4" ? "4.6" : regex(local.cluster_regex, var.cluster_type)[0]
+  cluster_type_cleaned  = regex(local.cluster_regex, var.ocp_version)[0] == "ocp4" ? "4.6" : regex(local.cluster_regex, var.ocp_version)[0]
   cluster_type          = local.config_values[local.cluster_type_cleaned].type
   # value should be ocp4, ocp3, or kubernetes
   cluster_type_code     = local.config_values[local.cluster_type_cleaned].type_code
@@ -98,7 +98,7 @@ data ibm_is_vpc vpc {
   name       = var.vpc_name
 }
 
-data ibm_is_subnets vpc_subnets {
+data ibm_is_subnet vpc_subnets {
   count = !var.exists ? var.vpc_subnet_count : 0
 
   identifier = data.ibm_is_vpc.vpc[0].subnets[count.index].id
