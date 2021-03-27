@@ -25,9 +25,9 @@ locals {
   cluster_name          = var.name != "" ? var.name : join("-", local.name_list)
   tmp_dir               = "${path.cwd}/.tmp"
   config_namespace      = "default"
-  server_url            = length(data.ibm_container_vpc_cluster.config) > 0 ? data.ibm_container_vpc_cluster.config[0].public_service_endpoint_url : ""
-  ingress_hostname      = length(data.ibm_container_vpc_cluster.config) > 0 ? data.ibm_container_vpc_cluster.config[0].ingress_hostname : ""
-  tls_secret            = length(data.ibm_container_vpc_cluster.config) > 0 ? data.ibm_container_vpc_cluster.config[0].ingress_secret : ""
+  server_url            = data.ibm_container_vpc_cluster.config.public_service_endpoint_url
+  ingress_hostname      = data.ibm_container_vpc_cluster.config.ingress_hostname
+  tls_secret            = data.ibm_container_vpc_cluster.config.ingress_secret
   openshift_versions    = {
   for version in data.ibm_container_cluster_versions.cluster_versions.valid_openshift_versions:
   substr(version, 0, 3) => "${version}_openshift"
@@ -42,10 +42,11 @@ locals {
   ibmcloud_release_name = "ibmcloud-config"
   cos_location          = "global"
   cos_name              = var.cos_name != "" ? var.cos_name : "${local.cluster_name}-ocp_cos_instance"
-
+  vpc_id                = !var.exists ? data.ibm_is_vpc.vpc[0].id : ""
+  vpc_subnet_ids        = !var.exists ? data.ibm_is_vpc.vpc[0].subnets[*].id : []
 }
 
-resource "null_resource" "create_dirs" {
+resource null_resource create_dirs {
   provisioner "local-exec" {
     command = "echo 'regex: ${local.cluster_regex}'"
   }
@@ -62,17 +63,17 @@ resource "null_resource" "create_dirs" {
   }
 }
 
-data "ibm_resource_group" "resource_group" {
+data ibm_resource_group resource_group {
   name = var.resource_group_name
 }
 
-data "ibm_container_cluster_versions" "cluster_versions" {
+data ibm_container_cluster_versions cluster_versions {
   depends_on = [null_resource.create_dirs]
 
   resource_group_id = data.ibm_resource_group.resource_group.id
 }
 
-resource "ibm_resource_instance" "cos_instance" {
+resource ibm_resource_instance cos_instance {
   count    = !var.exists && local.cluster_type_code == "ocp4" && var.provision_cos ? 1 : 0
 
   name              = local.cos_name
@@ -82,7 +83,7 @@ resource "ibm_resource_instance" "cos_instance" {
   resource_group_id = data.ibm_resource_group.resource_group.id
 }
 
-data "ibm_resource_instance" "cos_instance" {
+data ibm_resource_instance cos_instance {
   count      = !var.exists && local.cluster_type_code == "ocp4" ? 1 : 0
   depends_on = [ibm_resource_instance.cos_instance]
 
@@ -95,20 +96,14 @@ data "ibm_resource_instance" "cos_instance" {
 data ibm_is_vpc vpc {
   count = !var.exists ? 1 : 0
 
-  name       = var.vpc_name
+  name  = var.vpc_name
 }
 
-data ibm_is_subnet vpc_subnets {
-  count = !var.exists ? var.vpc_subnet_count : 0
-
-  identifier = data.ibm_is_vpc.vpc[0].subnets[count.index].id
-}
-
-resource "ibm_container_vpc_cluster" "cluster" {
+resource ibm_container_vpc_cluster cluster {
   count = !var.exists ? 1 : 0
 
   name              = local.cluster_name
-  vpc_id            = data.ibm_is_vpc.vpc[0].id
+  vpc_id            = local.vpc_id
   flavor            = var.flavor
   worker_count      = var.worker_count
   kube_version      = local.cluster_version
@@ -119,27 +114,27 @@ resource "ibm_container_vpc_cluster" "cluster" {
 
   zones {
     name      = "${var.region}-1"
-    subnet_id = data.ibm_is_vpc.vpc[0].subnets[0].id
+    subnet_id = local.vpc_subnet_ids[0]
   }
 }
 
-resource "ibm_container_vpc_worker_pool" "cluster_pool" {
+resource ibm_container_vpc_worker_pool cluster_pool {
   count             = !var.exists ? var.vpc_subnet_count - 1 : 0
 
   cluster           = ibm_container_vpc_cluster.cluster[0].id
   worker_pool_name  = "${local.cluster_name}-wp-${format("%02s", count.index + 1)}"
   flavor            = var.flavor
-  vpc_id            = data.ibm_is_vpc.vpc.id
+  vpc_id            = local.vpc_id
   worker_count      = var.worker_count
   resource_group_id = data.ibm_resource_group.resource_group.id
 
   zones {
     name      = "${var.region}-${((count.index + 1) % 3) + 1}"
-    subnet_id = data.ibm_is_vpc[0].subnets[count.index + 1].id
+    subnet_id = local.vpc_subnet_ids[count.index + 1]
   }
 }
 
-data "ibm_container_vpc_cluster" "config" {
+data ibm_container_vpc_cluster config {
   depends_on = [ibm_container_vpc_cluster.cluster, null_resource.create_dirs]
 
   name              = local.cluster_name
