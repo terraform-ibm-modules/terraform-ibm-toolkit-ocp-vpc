@@ -66,6 +66,12 @@ data "ibm_resource_group" "resource_group" {
   name = var.resource_group_name
 }
 
+data "ibm_container_cluster_versions" "cluster_versions" {
+  depends_on = [null_resource.create_dirs]
+
+  resource_group_id = data.ibm_resource_group.resource_group.id
+}
+
 resource "ibm_resource_instance" "cos_instance" {
   count    = !var.exists && local.cluster_type_code == "ocp4" && var.provision_cos ? 1 : 0
 
