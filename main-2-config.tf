@@ -31,6 +31,8 @@ locals {
 }
 
 resource "null_resource" "list_tmp" {
+  depends_on = [null_resource.create_dirs]
+
   triggers = {
     always_run = timestamp()
   }
