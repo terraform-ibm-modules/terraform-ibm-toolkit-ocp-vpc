@@ -1,3 +1,6 @@
+provider "ibm" {
+  region = var.region
+}
 
 locals {
   config_values = {
