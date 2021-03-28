@@ -30,7 +30,7 @@ variable "worker_count" {
 variable "flavor" {
   type        = string
   description = "The machine type that will be provisioned for classic infrastructure"
-  default     = "b3c.4x16"
+  default     = "bx2.4x16"
 }
 
 variable "ocp_version" {
