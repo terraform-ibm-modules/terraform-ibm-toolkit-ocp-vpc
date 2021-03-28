@@ -1,6 +1,7 @@
 provider "ibm" {
-  region     = var.region
-  generation = 2
+  region           = var.region
+  generation       = 2
+  ibmcloud_api_key = var.ibmcloud_api_key
 }
 
 locals {
@@ -47,7 +48,7 @@ locals {
   cos_location          = "global"
   cos_name              = var.cos_name != "" ? var.cos_name : "${local.cluster_name}-ocp_cos_instance"
   vpc_id                = !var.exists ? data.ibm_is_vpc.vpc[0].id : ""
-  vpc_subnet_ids        = !var.exists ? data.ibm_is_vpc.vpc[0].subnets[*].id : []
+  vpc_subnets           = !var.exists ? data.ibm_is_vpc.vpc[0].subnets : []
 }
 
 resource null_resource create_dirs {
@@ -98,6 +99,8 @@ data ibm_resource_instance cos_instance {
 }
 
 resource null_resource print-vpc_name {
+  depends_on = [null_resource.create_dirs]
+
   provisioner "local-exec" {
     command = "echo 'VPC name: ${var.vpc_name}'"
   }
@@ -124,8 +127,8 @@ resource ibm_container_vpc_cluster cluster {
   wait_till         = "IngressReady"
 
   zones {
-    name      = "${var.region}-1"
-    subnet_id = local.vpc_subnet_ids[0]
+    name      = local.vpc_subnets[0].zone
+    subnet_id = local.vpc_subnets[0].id
   }
 }
 
@@ -140,8 +143,8 @@ resource ibm_container_vpc_worker_pool cluster_pool {
   resource_group_id = data.ibm_resource_group.resource_group.id
 
   zones {
-    name      = "${var.region}-${((count.index + 1) % 3) + 1}"
-    subnet_id = local.vpc_subnet_ids[count.index + 1]
+    name      = local.vpc_subnets[count.index + 1].zone
+    subnet_id = local.vpc_subnets[count.index + 1].id
   }
 }
 
