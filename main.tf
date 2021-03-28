@@ -93,8 +93,15 @@ data ibm_resource_instance cos_instance {
   resource_group_id = data.ibm_resource_group.resource_group.id
 }
 
+resource null_resource print-vpc_name {
+  provisioner "local-exec" {
+    command = "echo 'VPC name: ${var.vpc_name}'"
+  }
+}
+
 data ibm_is_vpc vpc {
   count = !var.exists ? 1 : 0
+  depends_on = [null_resource.print-vpc_name]
 
   name  = var.vpc_name
 }
