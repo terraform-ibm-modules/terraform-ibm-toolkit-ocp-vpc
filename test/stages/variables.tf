@@ -62,7 +62,7 @@ variable "subnet_count" {
 
 variable "worker_count" {
   type        = number
-  default     = 1
+  default     = 2
 }
 
 variable "ocp_version" {
