@@ -25,13 +25,6 @@ variable "worker_count" {
   type        = number
   description = "The number of worker nodes that should be provisioned for classic infrastructure"
   default     = 3
-
-  validation {
-    condition = (
-      var.worker_count >= 2
-    )
-    error_message = "The minimum number of workers for an OCP cluster is 2"
-  }
 }
 
 variable "flavor" {
