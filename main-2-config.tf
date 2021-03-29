@@ -1,3 +1,11 @@
+provider "helm" {
+  version = ">= 1.1.1"
+
+  kubernetes {
+    config_path = local.cluster_config
+  }
+}
+
 locals {
   gitops_dir   = var.gitops_dir != "" ? var.gitops_dir : "${path.cwd}/gitops"
   chart_name   = "cloud-setup"
