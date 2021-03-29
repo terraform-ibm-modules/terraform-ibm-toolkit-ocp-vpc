@@ -1,52 +1,48 @@
-name: ""
+name: ibm-ocp-vpc
+alias: cluster
 type: terraform
-description: ""
+description: Provisions an IBM Cloud OCP cluster
 tags:
-    - tools
-    - devops
+    - ocp
+    - cluster
 versions:
 - platforms:
-    - kubernetes
-    - ocp3
     - ocp4
-  dependencies: []
-#    - id: cluster
-#      refs:
-#        - source: github.com/ibm-garage-cloud/terraform-ibm-container-platform
-#          version: ">= 1.7.0"
-#        - source: github.com/ibm-garage-cloud/terraform-k8s-ocp-cluster
-#          version: ">= 2.0.0"
-#    - id: namespace
-#      refs:
-#        - source: github.com/ibm-garage-cloud/terraform-k8s-namespace
-#          version: ">= 2.1.0"
-#    - id: dashboard
-#      refs:
-#        - source: github.com/ibm-garage-cloud/terraform-k8s-dashboard
-#          version: ">= 1.6.0"
-  variables: []
-#    - name: cluster_type
-#      moduleRef:
-#        id: cluster
-#        output: type_code
-#    - name: cluster_ingress_hostname
-#      moduleRef:
-#        id: cluster
-#        output: ingress_hostname
-#    - name: cluster_config_file
-#      moduleRef:
-#        id: cluster
-#        output: config_file_path
-#    - name: tls_secret_name
-#      moduleRef:
-#        id: cluster
-#        output: tls_secret_name
-#    - name: releases_namespace
-#      moduleRef:
-#        id: namespace
-#        output: name
-#        discriminator: tools
-#    - name: icon_url
-#      moduleRef:
-#        id: dashboard
-#        output: base_icon_url
+  dependencies:
+    - id: vpc
+      refs:
+        - source: github.com/cloud-native-toolkit/terraform-ibm-vpc
+          version: ">= 1.0.0"
+  variables:
+    - name: vpc_name
+      moduleRef:
+        id: vpc
+        output: name
+    - name: vpc_subnet_count
+      moduleRef:
+        id: vpc
+        output: subnet_count
+    - name: name_prefix
+      scope: global
+    - name: resource_group_name
+      scope: global
+    - name: region
+      scope: global
+    - name: ibmcloud_api_key
+      scope: global
+    - name: name
+      scope: module
+    - name: worker_count
+      scope: global
+    - name: ocp_version
+      scope: global
+    - name: exists
+      scope: module
+    - name: ocp_entitlement
+      scope: ignore
+    - name: gitops_dir
+      scope: global
+    - name: cos_name
+      scope: global
+    - name: provision_cos
+      scope: global
