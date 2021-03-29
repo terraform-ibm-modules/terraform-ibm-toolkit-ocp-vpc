@@ -64,18 +64,6 @@ variable "ocp_entitlement" {
   default     = "cloud_pak"
 }
 
-variable "cos_name" {
-  type        = string
-  description = "(optional) The name of the cos instance that will be used for the OCP 4 vpc instance"
-  default     = ""
-}
-
-variable "provision_cos" {
-  type        = bool
-  description = "Flag indicating that the cos instance should be provisioned, if necessary"
-  default     = true
-}
-
 variable "gitops_dir" {
   type        = string
   description = "Directory where the gitops repo content should be written"
@@ -91,4 +79,10 @@ variable "vpc_name" {
 variable "vpc_subnet_count" {
   type        = number
   description = "Number of vpc zones"
+}
+
+# COS Variables
+variable "cos_id" {
+  type        = string
+  description = "The crn of the COS instance that will be used with the OCP instance"
 }

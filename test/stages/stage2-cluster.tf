@@ -11,4 +11,5 @@ module "cluster" {
   name_prefix         = var.name_prefix
   vpc_name            = module.vpc.name
   vpc_subnet_count    = module.vpc.subnet_count
+  cos_id              = module.cos.id
 }

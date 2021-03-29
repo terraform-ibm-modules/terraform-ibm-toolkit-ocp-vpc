@@ -9,6 +9,10 @@ versions:
 - platforms:
     - ocp4
   dependencies:
+    - id: cos
+      refs:
+        - source: github.com/cloud-native-toolkit/terraform-ibm-object-storage
+          version: ">= 2.1.0"
     - id: vpc
       refs:
         - source: github.com/cloud-native-toolkit/terraform-ibm-vpc
@@ -22,6 +26,10 @@ versions:
       moduleRef:
         id: vpc
         output: subnet_count
+    - name: cos_id
+      moduleRef:
+        id: cos
+        output: id
     - name: name_prefix
       scope: global
     - name: resource_group_name

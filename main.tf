@@ -46,7 +46,6 @@ locals {
   cluster_version       = local.cluster_type == "openshift" ? local.openshift_versions[local.config_values[local.cluster_type_cleaned].version] : ""
   ibmcloud_release_name = "ibmcloud-config"
   cos_location          = "global"
-  cos_name              = var.cos_name != "" ? var.cos_name : "${local.cluster_name}-ocp_cos_instance"
   vpc_id                = !var.exists ? data.ibm_is_vpc.vpc[0].id : ""
   vpc_subnets           = !var.exists ? data.ibm_is_vpc.vpc[0].subnets : []
 }
@@ -78,26 +77,6 @@ data ibm_container_cluster_versions cluster_versions {
   resource_group_id = data.ibm_resource_group.resource_group.id
 }
 
-resource ibm_resource_instance cos_instance {
-  count    = !var.exists && var.provision_cos ? 1 : 0
-
-  name              = local.cos_name
-  service           = "cloud-object-storage"
-  plan              = "standard"
-  location          = local.cos_location
-  resource_group_id = data.ibm_resource_group.resource_group.id
-}
-
-data ibm_resource_instance cos_instance {
-  count      = !var.exists ? 1 : 0
-  depends_on = [ibm_resource_instance.cos_instance]
-
-  name              = local.cos_name
-  service           = "cloud-object-storage"
-  location          = local.cos_location
-  resource_group_id = data.ibm_resource_group.resource_group.id
-}
-
 resource null_resource print-vpc_name {
   depends_on = [null_resource.create_dirs]
 
@@ -122,7 +101,7 @@ resource ibm_container_vpc_cluster cluster {
   worker_count      = var.worker_count
   kube_version      = local.cluster_version
   entitlement       = var.ocp_entitlement
-  cos_instance_crn  = data.ibm_resource_instance.cos_instance[0].id
+  cos_instance_crn  = var.cos_id
   resource_group_id = data.ibm_resource_group.resource_group.id
   wait_till         = "IngressReady"
 
