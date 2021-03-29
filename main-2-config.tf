@@ -50,11 +50,23 @@ resource "null_resource" "list_tmp" {
   }
 }
 
-data ibm_container_cluster_config cluster {
+data ibm_container_cluster_config cluster_admin {
   depends_on        = [ibm_container_vpc_cluster.cluster, null_resource.list_tmp]
 
   cluster_name_id   = local.cluster_name
   admin             = true
+  resource_group_id = data.ibm_resource_group.resource_group.id
+  config_dir        = local.cluster_config_dir
+}
+
+data ibm_container_cluster_config cluster {
+  depends_on        = [
+    ibm_container_vpc_cluster.cluster,
+    null_resource.list_tmp,
+    data.ibm_container_cluster_config.cluster_admin
+  ]
+
+  cluster_name_id   = local.cluster_name
   resource_group_id = data.ibm_resource_group.resource_group.id
   config_dir        = local.cluster_config_dir
 }
