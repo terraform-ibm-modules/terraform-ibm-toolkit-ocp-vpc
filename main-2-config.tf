@@ -81,6 +81,10 @@ resource null_resource setup_kube_config {
   provisioner "local-exec" {
     command = "cp ${regex("(.*)/config.yml", data.ibm_container_cluster_config.cluster.config_file_path)[0]}/* ${local.cluster_config_dir}"
   }
+
+  provisioner "local-exec" {
+    command = "echo 'Waiting for 5 minutes for permissions to be established...' && sleep 300"
+  }
 }
 
 resource null_resource setup-chart {
