@@ -79,7 +79,7 @@ data ibm_container_cluster_versions cluster_versions {
 }
 
 resource ibm_resource_instance cos_instance {
-  count    = !var.exists && local.cluster_type_code == "ocp4" && var.provision_cos ? 1 : 0
+  count    = !var.exists && var.provision_cos ? 1 : 0
 
   name              = local.cos_name
   service           = "cloud-object-storage"
@@ -89,7 +89,7 @@ resource ibm_resource_instance cos_instance {
 }
 
 data ibm_resource_instance cos_instance {
-  count      = !var.exists && local.cluster_type_code == "ocp4" ? 1 : 0
+  count      = !var.exists ? 1 : 0
   depends_on = [ibm_resource_instance.cos_instance]
 
   name              = local.cos_name
@@ -121,8 +121,8 @@ resource ibm_container_vpc_cluster cluster {
   flavor            = var.flavor
   worker_count      = var.worker_count
   kube_version      = local.cluster_version
-  entitlement       = local.cluster_type_code == "ocp4" ? var.ocp_entitlement : ""
-  cos_instance_crn  = local.cluster_type_code == "ocp4" ? data.ibm_resource_instance.cos_instance[0].id : ""
+  entitlement       = var.ocp_entitlement
+  cos_instance_crn  = data.ibm_resource_instance.cos_instance[0].id
   resource_group_id = data.ibm_resource_group.resource_group.id
   wait_till         = "IngressReady"
 
