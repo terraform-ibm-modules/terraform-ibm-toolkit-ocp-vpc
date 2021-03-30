@@ -40,13 +40,12 @@ jobs:
 
       - name: Verify destroy on ${{ matrix.platform }}
         uses: ibm-garage-cloud/action-module-verify-destroy@main
-        #        if: ${{ always() }}
+        if: ${{ always() }}
         with:
           clusterId: ${{ matrix.platform }}
         env:
           TF_VAR_ibmcloud_api_key: ${{ secrets.IBMCLOUD_API_KEY }}
           IBMCLOUD_API_KEY: ${{ secrets.IBMCLOUD_API_KEY }}
-
 
   release:
     #    if: ${{ github.event_name == 'push' }}
