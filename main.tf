@@ -103,6 +103,7 @@ resource ibm_container_vpc_cluster cluster {
   entitlement       = var.ocp_entitlement
   cos_instance_crn  = var.cos_id
   resource_group_id = data.ibm_resource_group.resource_group.id
+  disable_public_service_endpoint = var.disable_public_endpoint
   wait_till         = "IngressReady"
 
   zones {
