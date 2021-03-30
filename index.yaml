@@ -1,0 +1,108 @@
+id: github.com/cloud-native-toolkit/terraform-ibm-ocp-vpc
+name: ibm-ocp-vpc
+alias: cluster
+type: terraform
+description: Provisions an IBM Cloud OCP cluster
+tags:
+  - ocp
+  - cluster
+versions:
+  - platforms:
+      - ocp4
+    dependencies:
+      - id: cos
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-object-storage
+            version: ">= 2.1.0"
+      - id: vpc
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-vpc
+            version: ">= 1.0.0"
+    variables:
+      - name: vpc_name
+        moduleRef:
+          id: vpc
+          output: name
+        type: string
+        description: Name of the VPC instance that will be used
+      - name: vpc_subnet_count
+        moduleRef:
+          id: vpc
+          output: subnet_count
+        type: number
+        description: Number of vpc zones
+      - name: cos_id
+        moduleRef:
+          id: cos
+          output: id
+        type: string
+        description: The crn of the COS instance that will be used with the OCP instance
+      - name: name_prefix
+        scope: global
+        type: string
+        description: The prefix name for the service. If not provided it will default to the resource group name
+        default: ""
+        optional: true
+      - name: resource_group_name
+        scope: global
+        type: string
+        description: The name of the IBM Cloud resource group where the cluster will be created/can be found.
+      - name: region
+        scope: global
+        type: string
+        description: The IBM Cloud region where the cluster will be/has been installed.
+      - name: ibmcloud_api_key
+        scope: global
+        type: string
+        description: The IBM Cloud api token
+      - name: name
+        scope: module
+        type: string
+        description: The name of the cluster that will be created within the resource group
+        default: ""
+        optional: true
+      - name: worker_count
+        scope: global
+        type: number
+        description: The number of worker nodes that should be provisioned for classic infrastructure
+        default: 3
+        optional: true
+      - name: ocp_version
+        scope: global
+        type: string
+        description: The version of the OpenShift cluster that should be provisioned (format 4.x)
+        default: 4.6 validation { condition = ( regex(^4[.], var.ocp_version) == 4. ) error_message = The ocp_version must be formatted as 4.x.
+        optional: true
+      - name: exists
+        scope: module
+        type: bool
+        description: Flag indicating if the cluster already exists (true or false)
+        default: false
+        optional: true
+      - name: ocp_entitlement
+        scope: ignore
+        type: string
+        description: Value that is applied to the entitlements for OCP cluster provisioning
+        default: cloud_pak
+        optional: true
+      - name: gitops_dir
+        scope: global
+        type: string
+        description: Directory where the gitops repo content should be written
+        default: ""
+        optional: true
+      - name: cos_name
+        scope: global
+      - name: provision_cos
+        scope: global
+      - name: flavor
+        type: string
+        description: The machine type that will be provisioned for classic infrastructure
+        default: bx2.4x16
+        optional: true
+      - name: disable_public_endpoint
+        type: bool
+        description: Flag indicating that the public endpoint should be disabled
+        default: false
+        optional: true
+    version: v1.0.0
