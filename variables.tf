@@ -52,6 +52,12 @@ variable "exists" {
   default     = false
 }
 
+variable "disable_public_endpoint" {
+  type        = bool
+  description = "Flag indicating that the public endpoint should be disabled"
+  default     = false
+}
+
 variable "name_prefix" {
   type        = string
   description = "The prefix name for the service. If not provided it will default to the resource group name"
