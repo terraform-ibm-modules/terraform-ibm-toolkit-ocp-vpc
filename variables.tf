@@ -37,13 +37,6 @@ variable "ocp_version" {
   type        = string
   description = "The version of the OpenShift cluster that should be provisioned (format 4.x)"
   default     = "4.6"
-
-  validation {
-    condition = (
-      regex("^4[.]", var.ocp_version) == "4."
-    )
-    error_message = "The ocp_version must be formatted as 4.x."
-  }
 }
 
 variable "exists" {
