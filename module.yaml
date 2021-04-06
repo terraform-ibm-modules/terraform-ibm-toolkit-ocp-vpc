@@ -50,7 +50,3 @@ versions:
       scope: ignore
     - name: gitops_dir
       scope: global
-    - name: cos_name
-      scope: global
-    - name: provision_cos
-      scope: global
