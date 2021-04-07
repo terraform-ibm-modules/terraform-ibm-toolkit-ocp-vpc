@@ -22,10 +22,18 @@ versions:
       moduleRef:
         id: vpc
         output: name
-    - name: vpc_subnet_count
+    - name: vpc_subnet_label_counts
       moduleRef:
         id: vpc
-        output: subnet_count
+        output: subnet_label_counts
+    - name: vpc_subnets
+      moduleRef:
+        id: vpc
+        output: subnets
+    - name: vpc_subnet_label
+      scope: module
+    - name: vpc_subnet_count
+      scope: ignore
     - name: cos_id
       moduleRef:
         id: cos

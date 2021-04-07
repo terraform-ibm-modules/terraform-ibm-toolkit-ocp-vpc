@@ -1,8 +1,3 @@
-provider "ibm" {
-  region           = var.region
-  generation       = 2
-  ibmcloud_api_key = var.ibmcloud_api_key
-}
 
 locals {
   config_values = {
@@ -46,8 +41,9 @@ locals {
   cluster_version       = local.cluster_type == "openshift" ? local.openshift_versions[local.config_values[local.cluster_type_cleaned].version] : ""
   ibmcloud_release_name = "ibmcloud-config"
   cos_location          = "global"
+  vpc_subnet_count      = length(var.vpc_subnet_label_counts) > 0 ? coalesce([ for val in var.vpc_subnet_label_counts: val if val.label == var.vpc_subnet_label ]...).count : var.vpc_subnet_count
   vpc_id                = !var.exists ? data.ibm_is_vpc.vpc[0].id : ""
-  vpc_subnets           = !var.exists ? data.ibm_is_vpc.vpc[0].subnets : []
+  vpc_subnets           = !var.exists ? (length(var.vpc_subnet_label_counts) > 0 ? [ for val in var.vpc_subnets: val if val.label == var.vpc_subnet_label ] : data.ibm_is_vpc.vpc[0].subnets) : []
 }
 
 resource null_resource create_dirs {
@@ -113,7 +109,7 @@ resource ibm_container_vpc_cluster cluster {
 }
 
 resource ibm_container_vpc_worker_pool cluster_pool {
-  count             = !var.exists ? var.vpc_subnet_count - 1 : 0
+  count             = !var.exists ? local.vpc_subnet_count - 1 : 0
 
   cluster           = ibm_container_vpc_cluster.cluster[0].id
   worker_pool_name  = "${local.cluster_name}-wp-${format("%02s", count.index + 1)}"
