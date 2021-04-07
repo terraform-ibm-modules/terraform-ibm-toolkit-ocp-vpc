@@ -63,7 +63,15 @@ resource null_resource create_dirs {
   }
 }
 
+resource null_resource print_resource_group {
+  provisioner "local-exec" {
+    command = "echo 'Resource group: ${var.resource_group_name}'"
+  }
+}
+
 data ibm_resource_group resource_group {
+  depends_on = [null_resource.print_resource_group]
+
   name = var.resource_group_name
 }
 
