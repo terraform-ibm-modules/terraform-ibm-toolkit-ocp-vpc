@@ -63,14 +63,20 @@ resource null_resource create_dirs {
   }
 }
 
-resource null_resource print_resource_group {
+resource null_resource print_resources {
   provisioner "local-exec" {
     command = "echo 'Resource group: ${var.resource_group_name}'"
+  }
+  provisioner "local-exec" {
+    command = "echo 'Cos id: ${var.cos_id}'"
+  }
+  provisioner "local-exec" {
+    command = "echo 'VPC name: ${var.vpc_name}'"
   }
 }
 
 data ibm_resource_group resource_group {
-  depends_on = [null_resource.print_resource_group]
+  depends_on = [null_resource.print_resources]
 
   name = var.resource_group_name
 }
@@ -81,23 +87,16 @@ data ibm_container_cluster_versions cluster_versions {
   resource_group_id = data.ibm_resource_group.resource_group.id
 }
 
-resource null_resource print-vpc_name {
-  depends_on = [null_resource.create_dirs]
-
-  provisioner "local-exec" {
-    command = "echo 'VPC name: ${var.vpc_name}'"
-  }
-}
-
 data ibm_is_vpc vpc {
   count = !var.exists ? 1 : 0
-  depends_on = [null_resource.print-vpc_name]
+  depends_on = [null_resource.print_resources]
 
   name  = var.vpc_name
 }
 
 resource ibm_container_vpc_cluster cluster {
   count = !var.exists ? 1 : 0
+  depends_on = [null_resource.print_resources]
 
   name              = local.cluster_name
   vpc_id            = local.vpc_id
