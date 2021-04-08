@@ -43,7 +43,7 @@ locals {
   cos_location          = "global"
   vpc_subnet_count      = length(var.vpc_subnet_label_counts) > 0 ? coalesce([ for val in var.vpc_subnet_label_counts: val if val.label == var.vpc_subnet_label ]...).count : var.vpc_subnet_count
   vpc_id                = !var.exists ? data.ibm_is_vpc.vpc[0].id : ""
-  vpc_subnets           = !var.exists ? (length(var.vpc_subnet_label_counts) > 0 ? [ for val in var.vpc_subnets: val if val.label == var.vpc_subnet_label ] : data.ibm_is_vpc.vpc[0].subnets) : []
+  vpc_subnets           = !var.exists ? (length(var.vpc_subnet_label_counts) > 0 ? [ for val in var.vpc_subnets: val if val.label == var.vpc_subnet_label ] : [ for val in data.ibm_is_vpc.vpc[0].subnets: { id = val.id, zone = val.zone, label = "default" } ]) : []
 }
 
 resource null_resource create_dirs {
