@@ -73,6 +73,9 @@ resource null_resource print_resources {
   provisioner "local-exec" {
     command = "echo 'VPC name: ${var.vpc_name}'"
   }
+}
+
+resource null_resource print_subnets {
   provisioner "local-exec" {
     command = "echo 'VPC subnet count: ${local.vpc_subnet_count}'"
   }
