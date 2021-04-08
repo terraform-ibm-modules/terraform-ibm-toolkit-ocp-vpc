@@ -73,6 +73,12 @@ resource null_resource print_resources {
   provisioner "local-exec" {
     command = "echo 'VPC name: ${var.vpc_name}'"
   }
+  provisioner "local-exec" {
+    command = "echo 'VPC subnet count: ${local.vpc_subnet_count}'"
+  }
+  provisioner "local-exec" {
+    command = "echo 'VPC subnets: ${jsonencode(local.vpc_subnets)}'"
+  }
 }
 
 data ibm_resource_group resource_group {
