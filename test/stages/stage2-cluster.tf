@@ -10,8 +10,7 @@ module "cluster" {
   exists              = var.cluster_exists
   name_prefix         = var.name_prefix
   vpc_name            = module.vpc.name
-  vpc_subnet_label_counts = module.vpc.subnet_label_counts
-  vpc_subnets         = module.vpc.subnets
-  vpc_subnet_label    = var.vpc_subnet_label
+  vpc_subnets         = module.subnets.subnets
+  vpc_subnet_count    = module.subnets.count
   cos_id              = module.cos.id
 }
