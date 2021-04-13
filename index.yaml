@@ -6,7 +6,98 @@ description: Provisions an IBM Cloud OCP cluster
 tags:
   - ocp
   - cluster
+  - vpc
 versions:
+  - platforms:
+      - ocp4
+    dependencies:
+      - id: resource-group
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-resource-group
+            version: ">= 1.0.0"
+      - id: cos
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-object-storage
+            version: ">= 2.1.0"
+      - id: vpc
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-vpc
+            version: ">= 1.0.0"
+      - id: subnets
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
+            version: ">= 1.0.0"
+    variables:
+      - name: resource_group_name
+        moduleRef:
+          id: resource-group
+          output: name
+        type: string
+      - name: vpc_name
+        moduleRef:
+          id: vpc
+          output: name
+        type: string
+      - name: vpc_subnet_count
+        moduleRef:
+          id: vpc
+          output: count
+        type: string
+      - name: vpc_subnets
+        moduleRef:
+          id: subnets
+          output: subnets
+        type: string
+      - name: cos_id
+        moduleRef:
+          id: cos
+          output: id
+        type: string
+      - name: name_prefix
+        scope: global
+        type: string
+      - name: region
+        scope: global
+        type: string
+      - name: ibmcloud_api_key
+        scope: global
+        type: string
+      - name: name
+        scope: module
+        type: string
+      - name: worker_count
+        scope: global
+        type: string
+      - name: ocp_version
+        scope: global
+        type: string
+      - name: exists
+        scope: module
+        type: string
+      - name: ocp_entitlement
+        scope: ignore
+        type: string
+      - name: gitops_dir
+        scope: global
+        type: string
+      - name: flavor
+        type: string
+      - name: disable_public_endpoint
+        type: string
+    version: v1.2.0
+    outputs:
+      - name: id
+        description: ID of the cluster.
+      - name: name
+        description: Name of the cluster.
+      - name: resource_group_name
+        description: Name of the resource group containing the cluster.
+      - name: region
+        description: Region containing the cluster.
+      - name: config_file_path
+        description: Path to the config file for the cluster.
+      - name: platform
+        description: Configuration values for the cluster platform
   - platforms:
       - ocp4
     dependencies:
