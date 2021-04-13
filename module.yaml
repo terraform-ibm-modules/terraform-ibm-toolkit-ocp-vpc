@@ -5,10 +5,15 @@ description: Provisions an IBM Cloud OCP cluster
 tags:
     - ocp
     - cluster
+    - vpc
 versions:
 - platforms:
     - ocp4
   dependencies:
+    - id: resource-group
+      refs:
+        - source: github.com/cloud-native-toolkit/terraform-ibm-resource-group
+          version: ">= 1.0.0"
     - id: cos
       refs:
         - source: github.com/cloud-native-toolkit/terraform-ibm-object-storage
@@ -17,7 +22,15 @@ versions:
       refs:
         - source: github.com/cloud-native-toolkit/terraform-ibm-vpc
           version: ">= 1.0.0"
+    - id: subnets
+      refs:
+        - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
+          version: ">= 1.0.0"
   variables:
+    - name: resource_group_name
+      moduleRef:
+        id: resource-group
+        output: name
     - name: vpc_name
       moduleRef:
         id: vpc
@@ -25,14 +38,16 @@ versions:
     - name: vpc_subnet_count
       moduleRef:
         id: vpc
-        output: subnet_count
+        output: count
+    - name: vpc_subnets
+      moduleRef:
+        id: subnets
+        output: subnets
     - name: cos_id
       moduleRef:
         id: cos
         output: id
     - name: name_prefix
-      scope: global
-    - name: resource_group_name
       scope: global
     - name: region
       scope: global

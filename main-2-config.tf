@@ -1,10 +1,3 @@
-provider "helm" {
-  version = ">= 1.1.1"
-
-  kubernetes {
-    config_path = local.cluster_config
-  }
-}
 
 locals {
   gitops_dir   = var.gitops_dir != "" ? var.gitops_dir : "${path.cwd}/gitops"
@@ -51,7 +44,7 @@ resource "null_resource" "list_tmp" {
 }
 
 data ibm_container_cluster_config cluster_admin {
-  depends_on        = [ibm_container_vpc_cluster.cluster, null_resource.list_tmp]
+  depends_on        = [data.ibm_container_vpc_cluster.config, null_resource.list_tmp]
 
   cluster_name_id   = local.cluster_name
   admin             = true
@@ -61,7 +54,7 @@ data ibm_container_cluster_config cluster_admin {
 
 data ibm_container_cluster_config cluster {
   depends_on        = [
-    ibm_container_vpc_cluster.cluster,
+    data.ibm_container_vpc_cluster.config,
     null_resource.list_tmp,
     data.ibm_container_cluster_config.cluster_admin
   ]
@@ -72,7 +65,7 @@ data ibm_container_cluster_config cluster {
 }
 
 resource null_resource setup_kube_config {
-  depends_on = [null_resource.create_dirs]
+  depends_on = [null_resource.create_dirs, data.ibm_container_cluster_config.cluster]
 
   provisioner "local-exec" {
     command = "rm -f ${local.cluster_config} && ln -s ${data.ibm_container_cluster_config.cluster.config_file_path} ${local.cluster_config}"

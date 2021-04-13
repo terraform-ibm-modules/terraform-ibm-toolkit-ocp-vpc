@@ -1,8 +1,3 @@
-provider "ibm" {
-  region           = var.region
-  generation       = 2
-  ibmcloud_api_key = var.ibmcloud_api_key
-}
 
 locals {
   config_values = {
@@ -45,9 +40,11 @@ locals {
   cluster_type_tag      = local.cluster_type == "kubernetes" ? "iks" : "ocp"
   cluster_version       = local.cluster_type == "openshift" ? local.openshift_versions[local.config_values[local.cluster_type_cleaned].version] : ""
   ibmcloud_release_name = "ibmcloud-config"
-  cos_location          = "global"
+  vpc_subnet_count      = var.vpc_subnet_count
   vpc_id                = !var.exists ? data.ibm_is_vpc.vpc[0].id : ""
-  vpc_subnets           = !var.exists ? data.ibm_is_vpc.vpc[0].subnets : []
+  vpc_subnets           = !var.exists ? var.vpc_subnets : []
+  security_group_id     = !var.exists ? data.ibm_is_vpc.vpc[0].default_security_group : ""
+  ipv4_cidr_blocks      = !var.exists ? data.ibm_is_subnet.vpc_subnet[*].ipv4_cidr_block : []
 }
 
 resource null_resource create_dirs {
@@ -67,7 +64,30 @@ resource null_resource create_dirs {
   }
 }
 
+resource null_resource print_resources {
+  provisioner "local-exec" {
+    command = "echo 'Resource group: ${var.resource_group_name}'"
+  }
+  provisioner "local-exec" {
+    command = "echo 'Cos id: ${var.cos_id}'"
+  }
+  provisioner "local-exec" {
+    command = "echo 'VPC name: ${var.vpc_name}'"
+  }
+}
+
+resource null_resource print_subnets {
+  provisioner "local-exec" {
+    command = "echo 'VPC subnet count: ${local.vpc_subnet_count}'"
+  }
+  provisioner "local-exec" {
+    command = "echo 'VPC subnets: ${jsonencode(local.vpc_subnets)}'"
+  }
+}
+
 data ibm_resource_group resource_group {
+  depends_on = [null_resource.print_resources]
+
   name = var.resource_group_name
 }
 
@@ -77,23 +97,22 @@ data ibm_container_cluster_versions cluster_versions {
   resource_group_id = data.ibm_resource_group.resource_group.id
 }
 
-resource null_resource print-vpc_name {
-  depends_on = [null_resource.create_dirs]
-
-  provisioner "local-exec" {
-    command = "echo 'VPC name: ${var.vpc_name}'"
-  }
-}
-
 data ibm_is_vpc vpc {
   count = !var.exists ? 1 : 0
-  depends_on = [null_resource.print-vpc_name]
+  depends_on = [null_resource.print_resources]
 
   name  = var.vpc_name
 }
 
+data ibm_is_subnet vpc_subnet {
+  count = !var.exists ? var.vpc_subnet_count : 0
+
+  identifier = local.vpc_subnets[count.index].id
+}
+
 resource ibm_container_vpc_cluster cluster {
   count = !var.exists ? 1 : 0
+  depends_on = [null_resource.print_resources]
 
   name              = local.cluster_name
   vpc_id            = local.vpc_id
@@ -113,7 +132,7 @@ resource ibm_container_vpc_cluster cluster {
 }
 
 resource ibm_container_vpc_worker_pool cluster_pool {
-  count             = !var.exists ? var.vpc_subnet_count - 1 : 0
+  count             = !var.exists ? local.vpc_subnet_count - 1 : 0
 
   cluster           = ibm_container_vpc_cluster.cluster[0].id
   worker_pool_name  = "${local.cluster_name}-wp-${format("%02s", count.index + 1)}"
@@ -128,8 +147,21 @@ resource ibm_container_vpc_worker_pool cluster_pool {
   }
 }
 
+resource ibm_is_security_group_rule rule_tcp_k8s {
+  count     = !var.exists ? local.vpc_subnet_count : 0
+
+  group     = local.security_group_id
+  direction = "inbound"
+  remote    = local.ipv4_cidr_blocks[count.index]
+
+  tcp {
+    port_min = 30000
+    port_max = 32767
+  }
+}
+
 data ibm_container_vpc_cluster config {
-  depends_on = [ibm_container_vpc_cluster.cluster, null_resource.create_dirs]
+  depends_on = [ibm_container_vpc_cluster.cluster, null_resource.create_dirs, ibm_is_security_group_rule.rule_tcp_k8s]
 
   name              = local.cluster_name
   alb_type          = "public"

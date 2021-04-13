@@ -77,7 +77,16 @@ variable "vpc_name" {
 
 variable "vpc_subnet_count" {
   type        = number
-  description = "Number of vpc zones"
+  description = "Number of vpc subnets"
+}
+
+variable "vpc_subnets" {
+  type        = list(object({
+    label = string
+    id    = string
+    zone  = string
+  }))
+  description = "List of subnets with labels"
 }
 
 # COS Variables

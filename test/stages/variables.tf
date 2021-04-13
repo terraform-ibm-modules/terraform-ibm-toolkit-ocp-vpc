@@ -26,15 +26,10 @@ variable "cluster_name" {
   default     = ""
 }
 
-variable "cluster_type" {
-  type        = string
-  description = "The type of cluster that should be created (openshift or kubernetes)"
-}
-
 variable "cluster_exists" {
   type        = string
   description = "Flag indicating if the cluster already exists (true or false)"
-  default     = "true"
+  default     = "false"
 }
 
 variable "name_prefix" {
@@ -55,9 +50,16 @@ variable "vpc_public_gateway" {
   default     = "true"
 }
 
-variable "subnet_count" {
+variable "vpc_subnet_count" {
   type        = number
-  default     = 2
+  description = "The number of subnets to create for the VPC instance"
+  default     = 0
+}
+
+variable "vpc_subnets" {
+  type        = string
+  description = "JSON representation of list of object, e.g. [{\"label\"=\"default\"}]"
+  default     = "[]"
 }
 
 variable "worker_count" {
@@ -68,4 +70,9 @@ variable "worker_count" {
 variable "ocp_version" {
   type        = string
   default     = "4.6"
+}
+
+variable "vpc_subnet_label" {
+  type        = string
+  default     = "cluster"
 }
