@@ -43,6 +43,8 @@ locals {
   vpc_subnet_count      = var.vpc_subnet_count
   vpc_id                = !var.exists ? data.ibm_is_vpc.vpc[0].id : ""
   vpc_subnets           = !var.exists ? var.vpc_subnets : []
+  security_group_id     = data.ibm_is_vpc.vpc.default_security_group
+  ipv4_cidr_blocks      = data.ibm_is_subnet.vpc_subnet[*].ipv4_cidr_block
 }
 
 resource null_resource create_dirs {
@@ -102,6 +104,12 @@ data ibm_is_vpc vpc {
   name  = var.vpc_name
 }
 
+data ibm_is_subnet vpc_subnet {
+  count = !var.exists ? var.vpc_subnet_count : 0
+
+  identifier = local.vpc_subnets[count.index].id
+}
+
 resource ibm_container_vpc_cluster cluster {
   count = !var.exists ? 1 : 0
   depends_on = [null_resource.print_resources]
@@ -139,8 +147,21 @@ resource ibm_container_vpc_worker_pool cluster_pool {
   }
 }
 
+resource ibm_is_security_group_rule rule_tcp_k8s {
+  count     = !var.exists ? local.vpc_subnet_count : 0
+
+  group     = local.security_group_id
+  direction = "inbound"
+  remote    = local.ipv4_cidr_blocks[count.index]
+
+  tcp {
+    port_min = 30000
+    port_max = 32767
+  }
+}
+
 data ibm_container_vpc_cluster config {
-  depends_on = [ibm_container_vpc_cluster.cluster, null_resource.create_dirs]
+  depends_on = [ibm_container_vpc_cluster.cluster, null_resource.create_dirs, ibm_is_security_group_rule.rule_tcp_k8s]
 
   name              = local.cluster_name
   alb_type          = "public"
