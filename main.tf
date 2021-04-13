@@ -43,8 +43,8 @@ locals {
   vpc_subnet_count      = var.vpc_subnet_count
   vpc_id                = !var.exists ? data.ibm_is_vpc.vpc[0].id : ""
   vpc_subnets           = !var.exists ? var.vpc_subnets : []
-  security_group_id     = data.ibm_is_vpc.vpc.default_security_group
-  ipv4_cidr_blocks      = data.ibm_is_subnet.vpc_subnet[*].ipv4_cidr_block
+  security_group_id     = !var.exists ? data.ibm_is_vpc.vpc[0].default_security_group : ""
+  ipv4_cidr_blocks      = !var.exists ? data.ibm_is_subnet.vpc_subnet[*].ipv4_cidr_block : []
 }
 
 resource null_resource create_dirs {
