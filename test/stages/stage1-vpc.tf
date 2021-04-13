@@ -1,5 +1,5 @@
 module "vpc" {
-  source = "github.com/cloud-native-toolkit/terraform-ibm-vpc.git?ref=split-module"
+  source = "github.com/cloud-native-toolkit/terraform-ibm-vpc.git"
 
   resource_group_id   = module.resource_group.id
   resource_group_name = module.resource_group.name
