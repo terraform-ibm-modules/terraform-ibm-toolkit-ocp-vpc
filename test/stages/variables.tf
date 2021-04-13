@@ -29,7 +29,7 @@ variable "cluster_name" {
 variable "cluster_exists" {
   type        = string
   description = "Flag indicating if the cluster already exists (true or false)"
-  default     = "true"
+  default     = "false"
 }
 
 variable "name_prefix" {
