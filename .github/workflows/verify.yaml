@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         platform:
-          - vpc_subnets
+          - vpc_count
       fail-fast: false
 
     env:
