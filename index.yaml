@@ -42,8 +42,8 @@ versions:
         description: Name of the VPC instance that will be used
       - name: vpc_subnet_count
         moduleRef:
-          id: vpc
-          output: subnets
+          id: subnets
+          output: count
         type: number
         description: Number of vpc subnets
       - name: vpc_subnets
