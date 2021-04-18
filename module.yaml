@@ -37,8 +37,8 @@ versions:
         output: name
     - name: vpc_subnet_count
       moduleRef:
-        id: vpc
-        output: subnets
+        id: subnets
+        output: count
     - name: vpc_subnets
       moduleRef:
         id: subnets
