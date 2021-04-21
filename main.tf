@@ -18,7 +18,7 @@ locals {
     }
   }
   cluster_config_dir    = "${path.cwd}/.kube"
-  cluster_config        = "${local.cluster_config_dir}/config"
+  cluster_config        = data.ibm_container_cluster_config.cluster.config_file_path
   cluster_type_file     = "${path.cwd}/.tmp/cluster_type.val"
   name_prefix           = var.name_prefix != "" ? var.name_prefix : var.resource_group_name
   name_list             = [local.name_prefix, "cluster"]
@@ -48,9 +48,14 @@ locals {
 }
 
 resource null_resource create_dirs {
+  triggers = {
+    always_run = timestamp()
+  }
+
   provisioner "local-exec" {
     command = "echo 'regex: ${local.cluster_regex}'"
   }
+
   provisioner "local-exec" {
     command = "echo 'cluster_type_cleaned: ${local.cluster_type_cleaned}'"
   }
@@ -76,6 +81,7 @@ resource null_resource print_resources {
   }
 }
 
+# separated to prevent circular dependency
 resource null_resource print_subnets {
   provisioner "local-exec" {
     command = "echo 'VPC subnet count: ${local.vpc_subnet_count}'"
