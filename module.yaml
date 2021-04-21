@@ -26,6 +26,13 @@ versions:
       refs:
         - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
           version: ">= 1.0.0"
+    - id: kms
+      refs:
+        - source: github.com/cloud-native-toolkit/terraform-ibm-key-protect
+          version: ">= 1.0.0"
+        - source: github.com/cloud-native-toolkit/terraform-ibm-hpcs
+          version: ">= 1.0.0"
+      optional: true
   variables:
     - name: resource_group_name
       moduleRef:
@@ -47,6 +54,13 @@ versions:
       moduleRef:
         id: cos
         output: id
+    - name: kms_id
+      moduleRef:
+        id: kms
+        output: id
+      optional: true
+    - name: kms_key_id
+      optional: true
     - name: name_prefix
       scope: global
     - name: region
