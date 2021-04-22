@@ -68,7 +68,11 @@ resource null_resource setup_kube_config {
   depends_on = [null_resource.create_dirs, data.ibm_container_cluster_config.cluster]
 
   provisioner "local-exec" {
-    command = "echo 'Waiting for 5 minutes for permissions to be established...' && sleep 300"
+    command = "${path.module}/scripts/wait-for-kubeconfig.sh"
+
+    environment = {
+      KUBECONFIG = local.cluster_config
+    }
   }
 }
 
