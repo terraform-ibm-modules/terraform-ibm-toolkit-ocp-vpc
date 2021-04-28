@@ -185,7 +185,6 @@ resource ibm_is_security_group_rule rule_tcp_k8s {
 
   group     = local.security_group_id
   direction = "inbound"
-  remote    = local.ipv4_cidr_blocks[count.index]
 
   tcp {
     port_min = 30000
