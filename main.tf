@@ -45,6 +45,16 @@ locals {
   vpc_subnets           = !var.exists ? var.vpc_subnets : []
   security_group_id     = !var.exists ? data.ibm_is_vpc.vpc[0].default_security_group : ""
   ipv4_cidr_blocks      = !var.exists ? data.ibm_is_subnet.vpc_subnet[*].ipv4_cidr_block : []
+  kms_enabled           = var.kms_id != "" && var.kms_key_id != ""
+  kms_config            = local.kms_enabled ? [{
+    instance_id      = var.kms_id
+    crk_id           = var.kms_key_id
+    private_endpoint = var.kms_private_endpoint
+  }] : []
+  policy_targets     = [
+    "kms",
+    "hs-crypto"
+  ]
 }
 
 resource null_resource create_dirs {
@@ -116,9 +126,17 @@ data ibm_is_subnet vpc_subnet {
   identifier = local.vpc_subnets[count.index].id
 }
 
+resource "ibm_iam_authorization_policy" "policy" {
+  count = local.kms_enabled && var.authorize_kms ? length(local.policy_targets) : 0
+
+  source_service_name         = "containers-kubernetes"
+  target_service_name         = local.policy_targets[count.index]
+  roles                       = ["Reader"]
+}
+
 resource ibm_container_vpc_cluster cluster {
   count = !var.exists ? 1 : 0
-  depends_on = [null_resource.print_resources]
+  depends_on = [null_resource.print_resources, ibm_iam_authorization_policy.policy]
 
   name              = local.cluster_name
   vpc_id            = local.vpc_id
@@ -134,6 +152,16 @@ resource ibm_container_vpc_cluster cluster {
   zones {
     name      = local.vpc_subnets[0].zone
     subnet_id = local.vpc_subnets[0].id
+  }
+
+  dynamic "kms_config" {
+    for_each = local.kms_config
+
+    content {
+      instance_id      = kms_config.value["instance_id"]
+      crk_id           = kms_config.value["crk_id"]
+      private_endpoint = kms_config.value["private_endpoint"]
+    }
   }
 }
 
