@@ -95,6 +95,12 @@ variable "cos_id" {
   description = "The crn of the COS instance that will be used with the OCP instance"
 }
 
+variable "kms_enabled" {
+  type        = bool
+  description = "Flag indicating that kms encryption should be enabled for this cluster"
+  default     = false
+}
+
 variable "kms_id" {
   type        = string
   description = "The crn of the KMS instance that will be used to encrypt the cluster."

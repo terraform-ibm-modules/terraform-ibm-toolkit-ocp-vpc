@@ -45,8 +45,7 @@ locals {
   vpc_subnets           = !var.exists ? var.vpc_subnets : []
   security_group_id     = !var.exists ? data.ibm_is_vpc.vpc[0].default_security_group : ""
   ipv4_cidr_blocks      = !var.exists ? data.ibm_is_subnet.vpc_subnet[*].ipv4_cidr_block : []
-  kms_enabled           = var.kms_key_id != ""
-  kms_config            = local.kms_enabled ? [{
+  kms_config            = var.kms_enabled ? [{
     instance_id      = var.kms_id
     crk_id           = var.kms_key_id
     private_endpoint = var.kms_private_endpoint
@@ -127,7 +126,7 @@ data ibm_is_subnet vpc_subnet {
 }
 
 resource "ibm_iam_authorization_policy" "policy" {
-  count = local.kms_enabled && var.authorize_kms ? length(local.policy_targets) : 0
+  count = var.kms_enabled && var.authorize_kms ? length(local.policy_targets) : 0
 
   source_service_name         = "containers-kubernetes"
   target_service_name         = local.policy_targets[count.index]
