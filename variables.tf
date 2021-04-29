@@ -118,3 +118,9 @@ variable "authorize_kms" {
   description = "Flag indicating that the authorization between the kms and the service should be created."
   default     = true
 }
+
+variable "login" {
+  type        = bool
+  description = "Flag indicating that after the cluster is provisioned, the module should log into the cluster"
+  default     = true
+}

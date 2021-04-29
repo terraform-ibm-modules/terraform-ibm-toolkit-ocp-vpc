@@ -51,6 +51,7 @@ locals {
     "kms",
     "hs-crypto"
   ]
+  cluster_config        = var.login ? data.ibm_container_cluster_config.cluster[0].config_file_path : ""
 }
 
 resource null_resource create_dirs {
@@ -196,3 +197,53 @@ data ibm_container_vpc_cluster config {
   alb_type          = var.disable_public_endpoint ? "private" : "public"
   resource_group_id = data.ibm_resource_group.resource_group.id
 }
+
+resource "null_resource" "list_tmp" {
+  depends_on = [null_resource.create_dirs]
+
+  triggers = {
+    always_run = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = "ls ${local.tmp_dir}"
+  }
+}
+
+
+data ibm_container_cluster_config cluster_admin {
+  count = var.login ? 1 : 0
+  depends_on        = [data.ibm_container_vpc_cluster.config, null_resource.list_tmp]
+
+  cluster_name_id   = local.cluster_name
+  admin             = true
+  resource_group_id = data.ibm_resource_group.resource_group.id
+  config_dir        = local.cluster_config_dir
+}
+
+data ibm_container_cluster_config cluster {
+  count = var.login ? 1 : 0
+  depends_on        = [
+    data.ibm_container_vpc_cluster.config,
+    null_resource.list_tmp,
+    data.ibm_container_cluster_config.cluster_admin
+  ]
+
+  cluster_name_id   = local.cluster_name
+  resource_group_id = data.ibm_resource_group.resource_group.id
+  config_dir        = local.cluster_config_dir
+}
+
+resource null_resource setup_kube_config {
+  count = var.login ? 1 : 0
+  depends_on = [null_resource.create_dirs, data.ibm_container_cluster_config.cluster]
+
+  provisioner "local-exec" {
+    command = "${path.module}/scripts/wait-for-kubeconfig.sh"
+
+    environment = {
+      KUBECONFIG = local.cluster_config
+    }
+  }
+}
+
