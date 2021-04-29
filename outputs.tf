@@ -29,6 +29,7 @@ output "config_file_path" {
 output "platform" {
   value = {
     id         = data.ibm_container_vpc_cluster.config.id
+    kubeconfig = local.cluster_config
     server_url = local.server_url
     type       = local.cluster_type
     type_code  = local.cluster_type_code
