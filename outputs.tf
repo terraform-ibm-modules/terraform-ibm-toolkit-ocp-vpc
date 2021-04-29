@@ -20,6 +20,12 @@ output "region" {
   depends_on  = [data.ibm_container_vpc_cluster.config]
 }
 
+output "config_file_path" {
+  value       = local.cluster_config
+  description = "Path to the config file for the cluster."
+  depends_on  = [data.ibm_container_vpc_cluster.config]
+}
+
 output "platform" {
   value = {
     id         = data.ibm_container_vpc_cluster.config.id
