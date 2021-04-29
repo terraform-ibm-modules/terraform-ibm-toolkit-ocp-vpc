@@ -63,12 +63,6 @@ variable "ocp_entitlement" {
   default     = "cloud_pak"
 }
 
-variable "gitops_dir" {
-  type        = string
-  description = "Directory where the gitops repo content should be written"
-  default     = ""
-}
-
 # VPC Variables
 variable "vpc_name" {
   type        = string

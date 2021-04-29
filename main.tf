@@ -18,13 +18,11 @@ locals {
     }
   }
   cluster_config_dir    = "${path.cwd}/.kube"
-  cluster_config        = data.ibm_container_cluster_config.cluster.config_file_path
   cluster_type_file     = "${path.cwd}/.tmp/cluster_type.val"
   name_prefix           = var.name_prefix != "" ? var.name_prefix : var.resource_group_name
   name_list             = [local.name_prefix, "cluster"]
   cluster_name          = var.name != "" ? var.name : join("-", local.name_list)
   tmp_dir               = "${path.cwd}/.tmp"
-  config_namespace      = "default"
   server_url            = data.ibm_container_vpc_cluster.config.public_service_endpoint_url
   ingress_hostname      = data.ibm_container_vpc_cluster.config.ingress_hostname
   tls_secret            = data.ibm_container_vpc_cluster.config.ingress_secret
@@ -39,7 +37,6 @@ locals {
   cluster_type_code     = local.config_values[local.cluster_type_cleaned].type_code
   cluster_type_tag      = local.cluster_type == "kubernetes" ? "iks" : "ocp"
   cluster_version       = local.cluster_type == "openshift" ? local.openshift_versions[local.config_values[local.cluster_type_cleaned].version] : ""
-  ibmcloud_release_name = "ibmcloud-config"
   vpc_subnet_count      = var.vpc_subnet_count
   vpc_id                = !var.exists ? data.ibm_is_vpc.vpc[0].id : ""
   vpc_subnets           = !var.exists ? var.vpc_subnets : []
@@ -185,7 +182,6 @@ resource ibm_is_security_group_rule rule_tcp_k8s {
 
   group     = local.security_group_id
   direction = "inbound"
-  remote    = local.ipv4_cidr_blocks[count.index]
 
   tcp {
     port_min = 30000
@@ -197,6 +193,6 @@ data ibm_container_vpc_cluster config {
   depends_on = [ibm_container_vpc_cluster.cluster, null_resource.create_dirs, ibm_is_security_group_rule.rule_tcp_k8s]
 
   name              = local.cluster_name
-  alb_type          = "public"
+  alb_type          = var.disable_public_endpoint ? "private" : "public"
   resource_group_id = data.ibm_resource_group.resource_group.id
 }

@@ -57,7 +57,7 @@ versions:
     - name: kms_id
       moduleRef:
         id: kms
-        output: id
+        output: guid
       optional: true
     - name: kms_key_id
       optional: true
