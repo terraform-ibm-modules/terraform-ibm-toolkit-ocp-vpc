@@ -23,7 +23,6 @@ locals {
   name_list             = [local.name_prefix, "cluster"]
   cluster_name          = var.name != "" ? var.name : join("-", local.name_list)
   tmp_dir               = "${path.cwd}/.tmp"
-  config_namespace      = "default"
   server_url            = data.ibm_container_vpc_cluster.config.public_service_endpoint_url
   ingress_hostname      = data.ibm_container_vpc_cluster.config.ingress_hostname
   tls_secret            = data.ibm_container_vpc_cluster.config.ingress_secret
@@ -38,7 +37,6 @@ locals {
   cluster_type_code     = local.config_values[local.cluster_type_cleaned].type_code
   cluster_type_tag      = local.cluster_type == "kubernetes" ? "iks" : "ocp"
   cluster_version       = local.cluster_type == "openshift" ? local.openshift_versions[local.config_values[local.cluster_type_cleaned].version] : ""
-  ibmcloud_release_name = "ibmcloud-config"
   vpc_subnet_count      = var.vpc_subnet_count
   vpc_id                = !var.exists ? data.ibm_is_vpc.vpc[0].id : ""
   vpc_subnets           = !var.exists ? var.vpc_subnets : []
