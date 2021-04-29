@@ -77,5 +77,3 @@ versions:
       scope: module
     - name: ocp_entitlement
       scope: ignore
-    - name: gitops_dir
-      scope: global
