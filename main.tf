@@ -18,7 +18,6 @@ locals {
     }
   }
   cluster_config_dir    = "${path.cwd}/.kube"
-  cluster_config        = data.ibm_container_cluster_config.cluster.config_file_path
   cluster_type_file     = "${path.cwd}/.tmp/cluster_type.val"
   name_prefix           = var.name_prefix != "" ? var.name_prefix : var.resource_group_name
   name_list             = [local.name_prefix, "cluster"]
@@ -196,6 +195,6 @@ data ibm_container_vpc_cluster config {
   depends_on = [ibm_container_vpc_cluster.cluster, null_resource.create_dirs, ibm_is_security_group_rule.rule_tcp_k8s]
 
   name              = local.cluster_name
-  alb_type          = "public"
+  alb_type          = var.disable_public_endpoint ? "private" : "public"
   resource_group_id = data.ibm_resource_group.resource_group.id
 }
