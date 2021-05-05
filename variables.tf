@@ -98,24 +98,18 @@ variable "kms_enabled" {
 variable "kms_id" {
   type        = string
   description = "The crn of the KMS instance that will be used to encrypt the cluster."
-  default     = ""
+  default     = null
 }
 
 variable "kms_key_id" {
   type        = string
   description = "The id of the root key in the KMS instance that will be used to encrypt the cluster."
-  default     = ""
+  default     = null
 }
 
 variable "kms_private_endpoint" {
   type        = bool
   description = "Flag indicating that the private endpoint should be used to connect the KMS system to the cluster."
-  default     = true
-}
-
-variable "authorize_kms" {
-  type        = bool
-  description = "Flag indicating that the authorization between the kms and the service should be created."
   default     = true
 }
 
