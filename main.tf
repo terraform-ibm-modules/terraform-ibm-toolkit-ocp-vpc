@@ -123,17 +123,9 @@ data ibm_is_subnet vpc_subnet {
   identifier = local.vpc_subnets[count.index].id
 }
 
-resource "ibm_iam_authorization_policy" "policy" {
-  count = var.kms_enabled && var.authorize_kms ? length(local.policy_targets) : 0
-
-  source_service_name         = "containers-kubernetes"
-  target_service_name         = local.policy_targets[count.index]
-  roles                       = ["Reader"]
-}
-
 resource ibm_container_vpc_cluster cluster {
   count = !var.exists ? 1 : 0
-  depends_on = [null_resource.print_resources, ibm_iam_authorization_policy.policy]
+  depends_on = [null_resource.print_resources]
 
   name              = local.cluster_name
   vpc_id            = local.vpc_id

@@ -26,11 +26,9 @@ versions:
       refs:
         - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
           version: ">= 1.0.0"
-    - id: kms
+    - id: kms_key
       refs:
-        - source: github.com/cloud-native-toolkit/terraform-ibm-key-protect
-          version: ">= 1.0.0"
-        - source: github.com/cloud-native-toolkit/terraform-ibm-hpcs
+        - source: github.com/cloud-native-toolkit/terraform-ibm-kms-key
           version: ">= 1.0.0"
       optional: true
   variables:
@@ -56,10 +54,13 @@ versions:
         output: id
     - name: kms_id
       moduleRef:
-        id: kms
-        output: guid
+        id: kms_key
+        output: kms_id
       optional: true
     - name: kms_key_id
+      moduleRef:
+        id: kms_key
+        output: id
       optional: true
     - name: name_prefix
       scope: global
@@ -76,4 +77,3 @@ versions:
     - name: exists
       scope: module
     - name: ocp_entitlement
-      scope: ignore
