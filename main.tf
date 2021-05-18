@@ -152,6 +152,12 @@ resource ibm_container_vpc_cluster cluster {
       private_endpoint = kms_config.value["private_endpoint"]
     }
   }
+
+  timeouts {
+    create = "90m"
+    update = "90m"
+    delete = "90m"
+  }
 }
 
 resource ibm_container_vpc_worker_pool cluster_pool {
