@@ -9,7 +9,7 @@ The module depends on the following software components:
 
 ### Command-line tools
 
-- terraform - v14
+- terraform - v13
 - kubectl
 
 ### Terraform providers
