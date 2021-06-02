@@ -152,7 +152,7 @@ versions:
         description: Flag indicating that after the cluster is provisioned, the module should log into the cluster
         default: false
         optional: true
-    version: v1.5.1
+    version: v1.6.0
     outputs:
       - name: id
         description: ID of the cluster.
