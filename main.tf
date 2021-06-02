@@ -124,9 +124,56 @@ data ibm_is_subnet vpc_subnet {
   identifier = local.vpc_subnets[count.index].id
 }
 
+resource null_resource open_acl_rules {
+  count = !var.exists && var.vpc_subnet_count > 0 ? 1 : 0
+
+  provisioner "local-exec" {
+    command = "${path.module}/scripts/open-acl-rules.sh ${data.ibm_is_subnet.vpc_subnet[0].network_acl}"
+  }
+}
+
+# from https://cloud.ibm.com/docs/vpc?topic=vpc-service-endpoints-for-vpc
+resource ibm_is_security_group_rule default_inbound_ping {
+  count = !var.exists ? 1 : 0
+
+  group     = local.security_group_id
+  direction = "inbound"
+  remote    = "0.0.0.0/0"
+
+  icmp {
+    type = 8
+  }
+}
+
+resource ibm_is_security_group_rule default_inbound_http {
+  count = !var.exists ? 1 : 0
+
+  group     = local.security_group_id
+  direction = "inbound"
+  remote    = "0.0.0.0/0"
+
+  tcp {
+    port_min = 80
+    port_max = 80
+  }
+}
+
+resource ibm_is_security_group_rule default_inbound_https {
+  count = !var.exists ? 1 : 0
+
+  group     = local.security_group_id
+  direction = "inbound"
+  remote    = "0.0.0.0/0"
+
+  tcp {
+    port_min = 443
+    port_max = 443
+  }
+}
+
 resource ibm_container_vpc_cluster cluster {
   count = !var.exists ? 1 : 0
-  depends_on = [null_resource.print_resources]
+  depends_on = [null_resource.print_resources, null_resource.open_acl_rules]
 
   name              = local.cluster_name
   vpc_id            = local.vpc_id
