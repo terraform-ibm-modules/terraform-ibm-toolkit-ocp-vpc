@@ -51,7 +51,8 @@ locals {
     "kms",
     "hs-crypto"
   ]
-  cluster_config        = var.login ? data.ibm_container_cluster_config.cluster[0].config_file_path : ""
+  login                 = var.login ? var.login : !var.disable_public_endpoint
+  cluster_config        = local.login ? data.ibm_container_cluster_config.cluster[0].config_file_path : ""
 }
 
 resource null_resource create_dirs {
@@ -204,7 +205,7 @@ resource "null_resource" "list_tmp" {
 
 
 data ibm_container_cluster_config cluster_admin {
-  count = var.login ? 1 : 0
+  count = local.login ? 1 : 0
   depends_on        = [data.ibm_container_vpc_cluster.config, null_resource.list_tmp]
 
   cluster_name_id   = local.cluster_name
@@ -214,7 +215,7 @@ data ibm_container_cluster_config cluster_admin {
 }
 
 data ibm_container_cluster_config cluster {
-  count = var.login ? 1 : 0
+  count = local.login ? 1 : 0
   depends_on        = [
     data.ibm_container_vpc_cluster.config,
     null_resource.list_tmp,
@@ -227,7 +228,7 @@ data ibm_container_cluster_config cluster {
 }
 
 resource null_resource setup_kube_config {
-  count = var.login ? 1 : 0
+  count = local.login ? 1 : 0
   depends_on = [null_resource.create_dirs, data.ibm_container_cluster_config.cluster]
 
   provisioner "local-exec" {
