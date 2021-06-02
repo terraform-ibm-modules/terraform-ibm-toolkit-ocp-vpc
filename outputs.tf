@@ -37,6 +37,7 @@ output "platform" {
     ingress    = local.ingress_hostname
     tls_secret = local.tls_secret
   }
+  sensitive = true
   description = "Configuration values for the cluster platform"
   depends_on  = [data.ibm_container_vpc_cluster.config]
 }
