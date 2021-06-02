@@ -158,7 +158,7 @@ resource ibm_container_vpc_worker_pool cluster_pool {
   count             = !var.exists ? local.vpc_subnet_count - 1 : 0
 
   cluster           = ibm_container_vpc_cluster.cluster[0].id
-  worker_pool_name  = "${local.cluster_name}-wp-${format("%02s", count.index + 1)}"
+  worker_pool_name  = "pool-${format("%02s", count.index + 2)}"
   flavor            = var.flavor
   vpc_id            = local.vpc_id
   worker_count      = var.worker_count
