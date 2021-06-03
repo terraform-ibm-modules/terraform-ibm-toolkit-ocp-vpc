@@ -128,7 +128,11 @@ resource null_resource open_acl_rules {
   count = !var.exists && var.vpc_subnet_count > 0 ? 1 : 0
 
   provisioner "local-exec" {
-    command = "${path.module}/scripts/open-acl-rules.sh ${data.ibm_is_subnet.vpc_subnet[0].network_acl}"
+    command = "${path.module}/scripts/open-acl-rules.sh '${data.ibm_is_subnet.vpc_subnet[0].network_acl}' '${var.region}' '${var.resource_group_name}'"
+
+    environment = {
+      IBMCLOUD_API_KEY = var.ibmcloud_api_key
+    }
   }
 }
 
