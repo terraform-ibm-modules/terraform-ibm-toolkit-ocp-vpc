@@ -18,14 +18,10 @@ versions:
       refs:
         - source: github.com/cloud-native-toolkit/terraform-ibm-object-storage
           version: ">= 2.1.0"
-    - id: vpc
-      refs:
-        - source: github.com/cloud-native-toolkit/terraform-ibm-vpc
-          version: ">= 1.0.0"
     - id: subnets
       refs:
         - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
-          version: ">= 1.0.0"
+          version: ">= 1.8.0"
     - id: kms_key
       refs:
         - source: github.com/cloud-native-toolkit/terraform-ibm-kms-key
@@ -38,8 +34,8 @@ versions:
         output: name
     - name: vpc_name
       moduleRef:
-        id: vpc
-        output: name
+        id: subnets
+        output: vpc_name
     - name: vpc_subnet_count
       moduleRef:
         id: subnets

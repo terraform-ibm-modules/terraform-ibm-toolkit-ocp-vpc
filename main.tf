@@ -58,6 +58,19 @@ locals {
   ]
   login                 = var.login ? var.login : !var.disable_public_endpoint
   cluster_config        = local.login ? data.ibm_container_cluster_config.cluster[0].config_file_path : ""
+  acl_rules             = [{
+    name = "allow-all-ingress"
+    action = "allow"
+    direction = "inbound"
+    source = "0.0.0.0/0"
+    destination = "0.0.0.0/0"
+  }, {
+    name = "allow-all-egress"
+    action = "allow"
+    direction = "outbound"
+    source = "0.0.0.0/0"
+    destination = "0.0.0.0/0"
+  }]
 }
 
 resource null_resource create_dirs {
@@ -129,14 +142,15 @@ data ibm_is_subnet vpc_subnet {
   identifier = local.vpc_subnets[count.index].id
 }
 
-resource null_resource open_acl_rules {
+resource null_resource setup_acl_rules {
   count = !var.exists && var.vpc_subnet_count > 0 ? 1 : 0
 
   provisioner "local-exec" {
-    command = "${path.module}/scripts/open-acl-rules.sh '${data.ibm_is_subnet.vpc_subnet[0].network_acl}' '${var.region}' '${var.resource_group_name}'"
+    command = "${path.module}/scripts/setup-acl-rules.sh '${data.ibm_is_subnet.vpc_subnet[0].network_acl}' '${var.region}' '${var.resource_group_name}'"
 
     environment = {
       IBMCLOUD_API_KEY = var.ibmcloud_api_key
+      ACL_RULES = jsonencode(local.acl_rules)
     }
   }
 }
@@ -182,7 +196,7 @@ resource ibm_is_security_group_rule default_inbound_https {
 
 resource ibm_container_vpc_cluster cluster {
   count = !var.exists ? 1 : 0
-  depends_on = [null_resource.print_resources, null_resource.open_acl_rules]
+  depends_on = [null_resource.print_resources, null_resource.setup_acl_rules]
 
   name              = local.cluster_name
   vpc_id            = local.vpc_id

@@ -9,7 +9,7 @@ module "cluster" {
   ocp_version         = var.ocp_version
   exists              = var.cluster_exists
   name_prefix         = var.name_prefix
-  vpc_name            = module.vpc.name
+  vpc_name            = module.subnets.vpc_name
   vpc_subnets         = module.subnets.subnets
   vpc_subnet_count    = module.subnets.count
   cos_id              = module.cos.id
