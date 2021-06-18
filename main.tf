@@ -16,6 +16,11 @@ locals {
       type_code = "ocp4"
       version   = "4.6"
     }
+    4.7  = {
+      type      = "openshift"
+      type_code = "ocp4"
+      version   = "4.7"
+    }
   }
   cluster_config_dir    = "${path.cwd}/.kube"
   cluster_type_file     = "${path.cwd}/.tmp/cluster_type.val"
@@ -31,7 +36,7 @@ locals {
   substr(version, 0, 3) => "${version}_openshift"
   }
   cluster_regex         = "(${join("|", keys(local.config_values))}|ocp4).*"
-  cluster_type_cleaned  = regex(local.cluster_regex, var.ocp_version)[0] == "ocp4" ? "4.6" : regex(local.cluster_regex, var.ocp_version)[0]
+  cluster_type_cleaned  = regex(local.cluster_regex, var.ocp_version)[0] == "ocp4" ? "4.7" : regex(local.cluster_regex, var.ocp_version)[0]
   cluster_type          = local.config_values[local.cluster_type_cleaned].type
   # value should be ocp4, ocp3, or kubernetes
   cluster_type_code     = local.config_values[local.cluster_type_cleaned].type_code
