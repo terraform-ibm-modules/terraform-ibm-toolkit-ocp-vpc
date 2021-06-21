@@ -14,7 +14,9 @@ if [[ -z "${IBMCLOUD_API_KEY}" ]]; then
   exit 1
 fi
 
-if [[ -z "${ACL_RULES}" ]] || [[ -z "${SG_RULES}" ]]; then
+if [[ -n "${ACL_RULES}" ]] || [[ -n "${SG_RULES}" ]]; then
+  echo "ACL_RULES or SG_RULES provided"
+else
   echo "ACL_RULES or SG_RULES environment variable must be set"
   exit 0
 fi
