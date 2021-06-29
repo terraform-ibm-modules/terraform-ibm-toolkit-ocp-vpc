@@ -41,3 +41,9 @@ output "platform" {
   description = "Configuration values for the cluster platform"
   depends_on  = [data.ibm_container_vpc_cluster.config]
 }
+
+output "sync" {
+  value = local.cluster_name
+  description = "Value used to sync downstream modules"
+  depends_on  = [data.ibm_container_vpc_cluster.config]
+}

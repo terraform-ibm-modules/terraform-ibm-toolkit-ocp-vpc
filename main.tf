@@ -93,6 +93,10 @@ resource null_resource create_dirs {
   provisioner "local-exec" {
     command = "mkdir -p ${local.cluster_config_dir}"
   }
+
+  provisioner "local-exec" {
+    command = "echo 'Sync value: ${var.sync}'"
+  }
 }
 
 resource null_resource print_resources {
