@@ -118,3 +118,9 @@ variable "login" {
   description = "Flag indicating that after the cluster is provisioned, the module should log into the cluster"
   default     = false
 }
+
+variable "sync" {
+  type        = string
+  description = "Value used to order dependencies"
+  default     = ""
+}
