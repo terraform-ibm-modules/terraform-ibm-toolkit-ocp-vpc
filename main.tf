@@ -300,17 +300,3 @@ data ibm_container_cluster_config cluster {
   resource_group_id = data.ibm_resource_group.resource_group.id
   config_dir        = local.cluster_config_dir
 }
-
-resource null_resource setup_kube_config {
-  count = local.login ? 1 : 0
-  depends_on = [null_resource.create_dirs, data.ibm_container_cluster_config.cluster]
-
-  provisioner "local-exec" {
-    command = "${path.module}/scripts/wait-for-kubeconfig.sh"
-
-    environment = {
-      KUBECONFIG = local.cluster_config
-    }
-  }
-}
-
