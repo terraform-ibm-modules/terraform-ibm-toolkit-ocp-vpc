@@ -133,6 +133,12 @@ data ibm_container_cluster_versions cluster_versions {
   resource_group_id = data.ibm_resource_group.resource_group.id
 }
 
+resource null_resource print_cluster_versions {
+  provisioner "local-exec" {
+    command = "echo 'Cluster versions: ${jsonencode(data.ibm_container_cluster_versions.cluster_versions.valid_openshift_versions)}'"
+  }
+}
+
 data ibm_is_vpc vpc {
   count = !var.exists ? 1 : 0
   depends_on = [null_resource.print_resources]
