@@ -41,7 +41,7 @@ locals {
   # value should be ocp4, ocp3, or kubernetes
   cluster_type_code     = local.config_values[local.cluster_type_cleaned].type_code
   cluster_type_tag      = local.cluster_type == "kubernetes" ? "iks" : "ocp"
-  cluster_version       = local.cluster_type == "openshift" ? local.openshift_versions[local.config_values[local.cluster_type_cleaned].version] : ""
+  cluster_version       = local.cluster_type == "openshift" ? "${var.ocp_version}_openshift" : ""
   vpc_subnet_count      = var.vpc_subnet_count
   vpc_id                = !var.exists ? data.ibm_is_vpc.vpc[0].id : ""
   vpc_subnets           = !var.exists ? var.vpc_subnets : []
