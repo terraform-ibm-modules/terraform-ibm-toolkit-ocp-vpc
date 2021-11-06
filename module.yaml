@@ -9,6 +9,9 @@ tags:
 versions:
 - platforms:
     - ocp4
+  providers:
+    - name: ibm
+      source: "ibm-cloud/ibm"
   dependencies:
     - id: resource-group
       refs:
@@ -72,6 +75,7 @@ versions:
       scope: module
     - name: worker_count
       scope: global
+      important: true
     - name: ocp_version
       scope: global
     - name: exists
