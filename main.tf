@@ -21,6 +21,11 @@ locals {
       type_code = "ocp4"
       version   = "4.7"
     }
+    4.8  = {
+      type      = "openshift"
+      type_code = "ocp4"
+      version   = "4.8"
+    }
   }
   cluster_config_dir    = "${path.cwd}/.kube"
   cluster_type_file     = "${path.cwd}/.tmp/cluster_type.val"
