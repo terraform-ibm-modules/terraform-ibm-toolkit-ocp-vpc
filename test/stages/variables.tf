@@ -69,7 +69,7 @@ variable "worker_count" {
 
 variable "ocp_version" {
   type        = string
-  default     = "4.6"
+  default     = "4.8"
 }
 
 variable "vpc_subnet_label" {
