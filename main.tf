@@ -48,6 +48,7 @@ locals {
   cluster_type_tag      = local.cluster_type == "kubernetes" ? "iks" : "ocp"
   cluster_version       = local.cluster_type == "openshift" ? "${var.ocp_version}_openshift" : ""
   vpc_subnet_count      = var.vpc_subnet_count
+  total_workers         = var.worker_count * var.vpc_subnet_count
   vpc_id                = !var.exists ? data.ibm_is_vpc.vpc[0].id : ""
   vpc_subnets           = !var.exists ? var.vpc_subnets : []
   security_group_id     = !var.exists ? data.ibm_is_vpc.vpc[0].default_security_group : ""
@@ -76,6 +77,12 @@ locals {
     source = "0.0.0.0/0"
     destination = "0.0.0.0/0"
   }]
+  workers = flatten([
+    for i in range(local.total_workers) : {
+      id = data.ibm_container_vpc_cluster_worker.workers[i].id
+      zone = data.ibm_container_vpc_cluster_worker.workers[i].network_interfaces[0].subnet_id
+    }
+  ])
 }
 
 resource null_resource create_dirs {
@@ -311,3 +318,9 @@ data ibm_container_cluster_config cluster {
   resource_group_id = data.ibm_resource_group.resource_group.id
   config_dir        = local.cluster_config_dir
 }
+
+data "ibm_container_vpc_cluster_worker" "workers" {
+  count = var.worker_count * var.vpc_subnet_count
+  worker_id       = data.ibm_container_vpc_cluster.config.workers[count.index]
+  cluster_name_id = data.ibm_container_vpc_cluster.config.id
+} 
