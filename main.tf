@@ -276,7 +276,7 @@ resource ibm_is_security_group_rule rule_tcp_k8s {
 }
 
 data ibm_container_vpc_cluster config {
-  depends_on = [ibm_container_vpc_cluster.cluster, null_resource.create_dirs, ibm_is_security_group_rule.rule_tcp_k8s]
+  depends_on = [ibm_container_vpc_cluster.cluster, null_resource.create_dirs, ibm_is_security_group_rule.rule_tcp_k8s, ibm_container_vpc_worker_pool.cluster_pool]
 
   name              = local.cluster_name
   alb_type          = var.disable_public_endpoint ? "private" : "public"
