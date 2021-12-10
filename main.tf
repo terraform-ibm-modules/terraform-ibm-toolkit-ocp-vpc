@@ -320,6 +320,10 @@ data ibm_container_cluster_config cluster {
 }
 
 data "ibm_container_vpc_cluster_worker" "workers" {
+  depends_on        = [
+    data.ibm_container_vpc_cluster.config,
+    ibm_container_vpc_worker_pool.cluster_pool
+  ]
   count = var.worker_count * var.vpc_subnet_count
   worker_id       = data.ibm_container_vpc_cluster.config.workers[count.index]
   cluster_name_id = data.ibm_container_vpc_cluster.config.id
