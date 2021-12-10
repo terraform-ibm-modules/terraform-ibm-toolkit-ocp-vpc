@@ -1,2 +1,13 @@
 .idea/
 *.iml
+
+*.tfstate*
+.terraform.lock*
+
+.terraform
+test/stages/.terraform
+test/stages/module
+
+test/existing-cluster/.terraform
+test/existing-cluster/module
+test/existing-cluster/.kube
