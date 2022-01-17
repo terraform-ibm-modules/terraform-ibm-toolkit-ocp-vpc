@@ -1,5 +1,7 @@
 name: ibm-ocp-vpc
 alias: cluster
+interfaces:
+- github.com/cloud-native-toolkit/automation-modules#cluster
 type: terraform
 description: Provisions an IBM Cloud OCP cluster
 tags:
