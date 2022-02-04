@@ -151,6 +151,12 @@ resource null_resource print_cluster_versions {
   }
 }
 
+module setup_clis {
+  source = "github.com/cloud-native-toolkit/terraform-util-clis.git"
+
+  clis = ["jq"]
+}
+
 data ibm_is_vpc vpc {
   count = !var.exists ? 1 : 0
   depends_on = [null_resource.print_resources]
@@ -173,6 +179,7 @@ resource null_resource setup_acl_rules {
     environment = {
       IBMCLOUD_API_KEY = var.ibmcloud_api_key
       ACL_RULES = jsonencode(local.acl_rules)
+      BIN_DIR = module.setup_clis.bin_dir
     }
   }
 }
