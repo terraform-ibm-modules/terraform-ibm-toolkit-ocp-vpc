@@ -82,6 +82,8 @@ versions:
       scope: global
     - name: exists
       scope: module
+    - name: flavor
+      important: true
     - name: sync
       moduleRef:
         id: sync
