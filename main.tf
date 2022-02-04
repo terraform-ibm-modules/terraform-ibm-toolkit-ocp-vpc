@@ -151,6 +151,12 @@ resource null_resource print_cluster_versions {
   }
 }
 
+module setup_clis {
+  source = "github.com/cloud-native-toolkit/terraform-util-clis.git"
+
+  clis = ["jq"]
+}
+
 data ibm_is_vpc vpc {
   count = !var.exists ? 1 : 0
   depends_on = [null_resource.print_resources]
@@ -173,6 +179,7 @@ resource null_resource setup_acl_rules {
     environment = {
       IBMCLOUD_API_KEY = var.ibmcloud_api_key
       ACL_RULES = jsonencode(local.acl_rules)
+      BIN_DIR = module.setup_clis.bin_dir
     }
   }
 }
@@ -231,9 +238,13 @@ resource ibm_container_vpc_cluster cluster {
   disable_public_service_endpoint = var.disable_public_endpoint
   wait_till         = "IngressReady"
 
-  zones {
-    name      = local.vpc_subnets[0].zone
-    subnet_id = local.vpc_subnets[0].id
+  dynamic "zones" {
+    for_each = local.vpc_subnets
+
+    content {
+      name = zones.value.zone
+      subnet_id = zones.value.id
+    }
   }
 
   dynamic "kms_config" {
@@ -244,22 +255,6 @@ resource ibm_container_vpc_cluster cluster {
       crk_id           = kms_config.value["crk_id"]
       private_endpoint = kms_config.value["private_endpoint"]
     }
-  }
-}
-
-resource ibm_container_vpc_worker_pool cluster_pool {
-  count             = !var.exists ? local.vpc_subnet_count - 1 : 0
-
-  cluster           = ibm_container_vpc_cluster.cluster[0].id
-  worker_pool_name  = "pool-${format("%02s", count.index + 2)}"
-  flavor            = var.flavor
-  vpc_id            = local.vpc_id
-  worker_count      = var.worker_count
-  resource_group_id = data.ibm_resource_group.resource_group.id
-
-  zones {
-    name      = local.vpc_subnets[count.index + 1].zone
-    subnet_id = local.vpc_subnets[count.index + 1].id
   }
 }
 
@@ -276,7 +271,7 @@ resource ibm_is_security_group_rule rule_tcp_k8s {
 }
 
 data ibm_container_vpc_cluster config {
-  depends_on = [ibm_container_vpc_cluster.cluster, null_resource.create_dirs, ibm_is_security_group_rule.rule_tcp_k8s, ibm_container_vpc_worker_pool.cluster_pool]
+  depends_on = [ibm_container_vpc_cluster.cluster, null_resource.create_dirs, ibm_is_security_group_rule.rule_tcp_k8s]
 
   name              = local.cluster_name
   alb_type          = var.disable_public_endpoint ? "private" : "public"
@@ -321,8 +316,7 @@ data ibm_container_cluster_config cluster {
 
 data "ibm_container_vpc_cluster_worker" "workers" {
   depends_on        = [
-    data.ibm_container_vpc_cluster.config,
-    ibm_container_vpc_worker_pool.cluster_pool
+    data.ibm_container_vpc_cluster.config
   ]
   count = var.worker_count * var.vpc_subnet_count
   worker_id       = data.ibm_container_vpc_cluster.config.workers[count.index]

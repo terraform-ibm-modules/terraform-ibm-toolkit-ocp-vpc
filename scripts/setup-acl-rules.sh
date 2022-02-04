@@ -50,13 +50,7 @@ if ! ibmcloud account show 1> /dev/null 2> /dev/null; then
 fi
 
 # Install jq if not available
-JQ=$(command -v jq || command -v ./bin/jq)
-
-if [[ -z "${JQ}" ]]; then
-  echo "jq missing. Installing"
-  mkdir -p ./bin && curl -Lo ./bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
-  JQ="${PWD}/bin/jq"
-fi
+JQ=$(command -v jq || command -v "${BIN_DIR}/jq")
 
 ## TODO more sophisticated logic needed to 1) test for existing rules and 2) place this rule in the right order
 
