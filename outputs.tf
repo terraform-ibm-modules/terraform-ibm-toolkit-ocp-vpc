@@ -51,11 +51,11 @@ output "sync" {
 output "total_worker_count" {
   description = "The total number of workers for the cluster. (subnets * number of workers)"
   value = local.total_workers
-  depends_on  = [ibm_container_vpc_worker_pool.cluster_pool]
+  depends_on  = [data.ibm_container_vpc_cluster_worker.workers]
 }
 
 output "workers" {
   description = "List of objects containing data for all workers "
   value = local.workers
-  depends_on  = [ibm_container_vpc_worker_pool.cluster_pool]
+  depends_on  = [data.ibm_container_vpc_cluster_worker.workers]
 }
