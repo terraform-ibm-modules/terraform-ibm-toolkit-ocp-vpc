@@ -45,7 +45,7 @@ provider "ibm" {
 }
 
 module "cluster" {
-  source = "github.com/cloud-native-toolkit/terraform-ibm-ocp-vpc.git"
+  source = "cloud-native-toolkit/ocp-vpc/ibm"
 
   resource_group_name = var.resource_group_name
   region              = var.region
