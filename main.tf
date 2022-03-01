@@ -145,7 +145,7 @@ data ibm_is_subnet vpc_subnet {
 }
 
 resource ibm_is_network_acl_rule rules {
-  count = !var.exists && var.vpc_subnet_count > 0 ? length(local.acl_rules)
+  count = !var.exists && var.vpc_subnet_count > 0 ? length(local.acl_rules) : 0
 
   network_acl = data.ibm_is_subnet.vpc_subnet[0].network_acl
   name        = local.acl_rules[count.index].name
