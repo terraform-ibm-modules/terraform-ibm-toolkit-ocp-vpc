@@ -196,7 +196,7 @@ resource ibm_is_security_group_rule default_inbound_https {
 
 resource ibm_container_vpc_cluster cluster {
   count = !var.exists ? 1 : 0
-  depends_on = [null_resource.print_resources, null_resource.setup_acl_rules]
+  depends_on = [null_resource.print_resources, ibm_is_network_acl_rule.rules]
 
   name              = local.cluster_name
   vpc_id            = local.vpc_id
