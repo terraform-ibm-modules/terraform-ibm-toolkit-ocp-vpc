@@ -27,31 +27,28 @@ locals {
       version   = "4.8"
     }
   }
-  cluster_config_dir    = "${path.cwd}/.kube"
-  cluster_type_file     = "${path.cwd}/.tmp/cluster_type.val"
   name_prefix           = var.name_prefix != "" ? var.name_prefix : var.resource_group_name
   name_list             = [local.name_prefix, "cluster"]
   cluster_name          = var.name != "" ? var.name : join("-", local.name_list)
-  tmp_dir               = "${path.cwd}/.tmp"
-  server_url            = data.ibm_container_vpc_cluster.config.public_service_endpoint_url
-  ingress_hostname      = data.ibm_container_vpc_cluster.config.ingress_hostname
-  tls_secret            = data.ibm_container_vpc_cluster.config.ingress_secret
+  server_url            = lookup(data.ibm_container_vpc_cluster.config, "public_service_endpoint_url", "")
+  ingress_hostname      = lookup(data.ibm_container_vpc_cluster.config, "ingress_hostname", "")
+  tls_secret            = lookup(data.ibm_container_vpc_cluster.config, "ingress_secret", "")
   openshift_versions    = {
-  for version in data.ibm_container_cluster_versions.cluster_versions.valid_openshift_versions:
+  for version in lookup(data.ibm_container_cluster_versions.cluster_versions, "valid_openshift_versions", []):
   substr(version, 0, 3) => "${version}_openshift"
   }
   cluster_regex         = "(${join("|", keys(local.config_values))}|ocp4).*"
   cluster_type_cleaned  = regex(local.cluster_regex, var.ocp_version)[0] == "ocp4" ? "4.7" : regex(local.cluster_regex, var.ocp_version)[0]
-  cluster_type          = local.config_values[local.cluster_type_cleaned].type
+  cluster_type          = lookup(local.config_values[local.cluster_type_cleaned], "type", "")
   # value should be ocp4, ocp3, or kubernetes
-  cluster_type_code     = local.config_values[local.cluster_type_cleaned].type_code
+  cluster_type_code     = lookup(local.config_values[local.cluster_type_cleaned], "type_code", "")
   cluster_type_tag      = local.cluster_type == "kubernetes" ? "iks" : "ocp"
   cluster_version       = local.cluster_type == "openshift" ? "${var.ocp_version}_openshift" : ""
   vpc_subnet_count      = var.vpc_subnet_count
   total_workers         = var.worker_count * var.vpc_subnet_count
   vpc_id                = !var.exists ? data.ibm_is_vpc.vpc[0].id : ""
   vpc_subnets           = !var.exists ? var.vpc_subnets : []
-  security_group_id     = !var.exists ? data.ibm_is_vpc.vpc[0].default_security_group : ""
+  security_group_id     = !var.exists ? lookup(data.ibm_is_vpc.vpc[0], "default_security_group", "") : ""
   ipv4_cidr_blocks      = !var.exists ? data.ibm_is_subnet.vpc_subnet[*].ipv4_cidr_block : []
   kms_config            = var.kms_enabled ? [{
     instance_id      = var.kms_id
@@ -63,7 +60,7 @@ locals {
     "hs-crypto"
   ]
   login                 = var.login ? var.login : !var.disable_public_endpoint
-  cluster_config        = local.login ? data.ibm_container_cluster_config.cluster[0].config_file_path : ""
+  cluster_config        = local.login ? lookup(data.ibm_container_cluster_config.cluster[0], "config_file_path", "") : ""
   acl_rules             = [{
     name = "allow-all-ingress"
     action = "allow"
@@ -85,29 +82,13 @@ locals {
   ])
 }
 
-resource null_resource create_dirs {
-  triggers = {
-    always_run = timestamp()
-  }
+data external dirs {
+  program = ["bash", "${path.module}/scripts/create-dirs.sh"]
 
-  provisioner "local-exec" {
-    command = "echo 'regex: ${local.cluster_regex}'"
-  }
-
-  provisioner "local-exec" {
-    command = "echo 'cluster_type_cleaned: ${local.cluster_type_cleaned}'"
-  }
-
-  provisioner "local-exec" {
-    command = "mkdir -p ${local.tmp_dir}"
-  }
-
-  provisioner "local-exec" {
-    command = "mkdir -p ${local.cluster_config_dir}"
-  }
-
-  provisioner "local-exec" {
-    command = "echo 'Sync value: ${var.sync}'"
+  query = {
+    tmp_dir = "${path.cwd}/.tmp"
+    cluster_config_dir = "${path.cwd}/.kube"
+    sync = var.sync
   }
 }
 
@@ -140,15 +121,8 @@ data ibm_resource_group resource_group {
 }
 
 data ibm_container_cluster_versions cluster_versions {
-  depends_on = [null_resource.create_dirs]
 
   resource_group_id = data.ibm_resource_group.resource_group.id
-}
-
-resource null_resource print_cluster_versions {
-  provisioner "local-exec" {
-    command = "echo 'Cluster versions: ${jsonencode(data.ibm_container_cluster_versions.cluster_versions.valid_openshift_versions)}'"
-  }
 }
 
 module setup_clis {
@@ -167,14 +141,14 @@ data ibm_is_vpc vpc {
 data ibm_is_subnet vpc_subnet {
   count = !var.exists ? var.vpc_subnet_count : 0
 
-  identifier = local.vpc_subnets[count.index].id
+  identifier = lookup(local.vpc_subnets[count.index], "id", "")
 }
 
 resource null_resource setup_acl_rules {
   count = !var.exists && var.vpc_subnet_count > 0 ? 1 : 0
 
   provisioner "local-exec" {
-    command = "${path.module}/scripts/setup-acl-rules.sh '${data.ibm_is_subnet.vpc_subnet[0].network_acl}' '${var.region}' '${var.resource_group_name}'"
+    command = "${path.module}/scripts/setup-acl-rules.sh '${lookup(data.ibm_is_subnet.vpc_subnet[0], "network_acl", "")}' '${var.region}' '${var.resource_group_name}'"
 
     environment = {
       IBMCLOUD_API_KEY = var.ibmcloud_api_key
@@ -271,47 +245,33 @@ resource ibm_is_security_group_rule rule_tcp_k8s {
 }
 
 data ibm_container_vpc_cluster config {
-  depends_on = [ibm_container_vpc_cluster.cluster, null_resource.create_dirs, ibm_is_security_group_rule.rule_tcp_k8s]
+  depends_on = [ibm_container_vpc_cluster.cluster, ibm_is_security_group_rule.rule_tcp_k8s]
 
   name              = local.cluster_name
   alb_type          = var.disable_public_endpoint ? "private" : "public"
   resource_group_id = data.ibm_resource_group.resource_group.id
 }
 
-resource "null_resource" "list_tmp" {
-  depends_on = [null_resource.create_dirs]
-
-  triggers = {
-    always_run = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command = "ls ${local.tmp_dir}"
-  }
-}
-
-
 data ibm_container_cluster_config cluster_admin {
   count = local.login ? 1 : 0
-  depends_on        = [data.ibm_container_vpc_cluster.config, null_resource.list_tmp]
+  depends_on        = [data.ibm_container_vpc_cluster.config]
 
   cluster_name_id   = local.cluster_name
   admin             = true
   resource_group_id = data.ibm_resource_group.resource_group.id
-  config_dir        = local.cluster_config_dir
+  config_dir        = data.external.dirs.result.cluster_config_dir
 }
 
 data ibm_container_cluster_config cluster {
   count = local.login ? 1 : 0
   depends_on        = [
     data.ibm_container_vpc_cluster.config,
-    null_resource.list_tmp,
     data.ibm_container_cluster_config.cluster_admin
   ]
 
   cluster_name_id   = local.cluster_name
   resource_group_id = data.ibm_resource_group.resource_group.id
-  config_dir        = local.cluster_config_dir
+  config_dir        = data.external.dirs.result.cluster_config_dir
 }
 
 data "ibm_container_vpc_cluster_worker" "workers" {
