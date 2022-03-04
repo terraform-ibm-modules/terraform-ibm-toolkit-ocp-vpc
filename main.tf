@@ -144,18 +144,15 @@ data ibm_is_subnet vpc_subnet {
   identifier = lookup(local.vpc_subnets[count.index], "id", "")
 }
 
-resource null_resource setup_acl_rules {
-  count = !var.exists && var.vpc_subnet_count > 0 ? 1 : 0
+resource ibm_is_network_acl_rule rules {
+  count = !var.exists && var.vpc_subnet_count > 0 ? length(local.acl_rules) : 0
 
-  provisioner "local-exec" {
-    command = "${path.module}/scripts/setup-acl-rules.sh '${lookup(data.ibm_is_subnet.vpc_subnet[0], "network_acl", "")}' '${var.region}' '${var.resource_group_name}'"
-
-    environment = {
-      IBMCLOUD_API_KEY = var.ibmcloud_api_key
-      ACL_RULES = jsonencode(local.acl_rules)
-      BIN_DIR = module.setup_clis.bin_dir
-    }
-  }
+  network_acl = data.ibm_is_subnet.vpc_subnet[0].network_acl
+  name        = local.acl_rules[count.index].name
+  action      = local.acl_rules[count.index].action
+  source      = local.acl_rules[count.index].source
+  destination = local.acl_rules[count.index].destination
+  direction   = local.acl_rules[count.index].direction
 }
 
 # from https://cloud.ibm.com/docs/vpc?topic=vpc-service-endpoints-for-vpc
@@ -199,7 +196,7 @@ resource ibm_is_security_group_rule default_inbound_https {
 
 resource ibm_container_vpc_cluster cluster {
   count = !var.exists ? 1 : 0
-  depends_on = [null_resource.print_resources, null_resource.setup_acl_rules]
+  depends_on = [null_resource.print_resources, ibm_is_network_acl_rule.rules]
 
   name              = local.cluster_name
   vpc_id            = local.vpc_id
