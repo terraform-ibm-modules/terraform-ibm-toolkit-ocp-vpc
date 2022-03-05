@@ -63,6 +63,18 @@ variable "ocp_entitlement" {
   default     = "cloud_pak"
 }
 
+variable "force_delete_storage" {
+  type        = bool
+  description = "Attribute to force the removal of persistent storage associtated with the cluster"
+  default     = false
+}
+
+variable "tags" {
+  type        = list(string)
+  default     = []
+  description = "Tags that should be added to the instance"
+}
+
 # VPC Variables
 variable "vpc_name" {
   type        = string

@@ -207,7 +207,9 @@ resource ibm_container_vpc_cluster cluster {
   cos_instance_crn  = var.cos_id
   resource_group_id = data.ibm_resource_group.resource_group.id
   disable_public_service_endpoint = var.disable_public_endpoint
+  force_delete_storage = var.force_delete_storage
   wait_till         = "IngressReady"
+  tags              = var.tags
 
   dynamic "zones" {
     for_each = local.vpc_subnets
