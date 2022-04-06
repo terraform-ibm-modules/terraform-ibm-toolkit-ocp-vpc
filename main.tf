@@ -26,6 +26,11 @@ locals {
       type_code = "ocp4"
       version   = "4.8"
     }
+    4.9  = {
+      type      = "openshift"
+      type_code = "ocp4"
+      version   = "4.9"
+    }
   }
   name_prefix           = var.name_prefix != "" ? var.name_prefix : var.resource_group_name
   name_list             = [local.name_prefix, "cluster"]
