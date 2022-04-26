@@ -246,7 +246,7 @@ resource ibm_is_security_group_rule rule_tcp_k8s {
 data ibm_container_vpc_cluster config {
   depends_on = [ibm_container_vpc_cluster.cluster, ibm_is_security_group_rule.rule_tcp_k8s]
 
-  name              = local.cluster_name
+  name              = !var.exists ? ibm_container_vpc_cluster.cluster[0].name : local.cluster_name
   alb_type          = var.disable_public_endpoint ? "private" : "public"
   resource_group_id = data.ibm_resource_group.resource_group.id
 }
@@ -255,7 +255,7 @@ data ibm_container_cluster_config cluster_admin {
   count = local.login ? 1 : 0
   depends_on        = [data.ibm_container_vpc_cluster.config]
 
-  cluster_name_id   = local.cluster_name
+  cluster_name_id   = !var.exists ? ibm_container_vpc_cluster.cluster[0].name : local.cluster_name
   admin             = true
   resource_group_id = data.ibm_resource_group.resource_group.id
   config_dir        = data.external.dirs.result.cluster_config_dir
@@ -268,7 +268,7 @@ data ibm_container_cluster_config cluster {
     data.ibm_container_cluster_config.cluster_admin
   ]
 
-  cluster_name_id   = local.cluster_name
+  cluster_name_id   = !var.exists ? ibm_container_vpc_cluster.cluster[0].name : local.cluster_name
   resource_group_id = data.ibm_resource_group.resource_group.id
   config_dir        = data.external.dirs.result.cluster_config_dir
 }
