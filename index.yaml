@@ -177,6 +177,201 @@ versions:
         moduleRef:
           id: sync
           output: sync
+    version: v1.13.3
+    outputs:
+      - name: id
+        description: ID of the cluster.
+      - name: name
+        description: Name of the cluster.
+      - name: resource_group_name
+        description: Name of the resource group containing the cluster.
+      - name: region
+        description: Region containing the cluster.
+      - name: config_file_path
+        description: Path to the config file for the cluster.
+      - name: platform
+        type:
+          lines:
+            - local.cluster_type
+        sensitive: true
+        description: Configuration values for the cluster platform
+      - name: sync
+        description: Value used to sync downstream modules
+      - name: total_worker_count
+        description: >-
+          The total number of workers for the cluster. (subnets * number of
+          workers)
+      - name: workers
+        description: 'List of objects containing data for all workers '
+  - platforms:
+      - ocp4
+    providers:
+      - name: ibm
+        source: ibm-cloud/ibm
+    dependencies:
+      - id: resource-group
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-resource-group
+            version: '>= 1.0.0'
+      - id: cos
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-object-storage
+            version: '>= 2.1.0'
+      - id: subnets
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
+            version: '>= 1.8.0'
+      - id: kms_key
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-kms-key
+            version: '>= 1.0.0'
+        optional: true
+      - id: sync
+        refs: []
+        interface: github.com/cloud-native-toolkit/automation-modules#sync
+        optional: true
+    variables:
+      - name: resource_group_name
+        type: string
+        description: >-
+          The name of the IBM Cloud resource group where the cluster will be
+          created/can be found.
+        moduleRef:
+          id: resource-group
+          output: name
+      - name: region
+        type: string
+        description: The IBM Cloud region where the cluster will be/has been installed.
+        scope: global
+      - name: ibmcloud_api_key
+        type: string
+        description: The IBM Cloud api token
+        scope: global
+      - name: name
+        type: string
+        description: The name of the cluster that will be created within the resource group
+        default: ''
+        scope: module
+      - name: worker_count
+        type: number
+        description: >-
+          The number of worker nodes that should be provisioned for classic
+          infrastructure
+        default: '3'
+        scope: global
+        important: true
+      - name: flavor
+        type: string
+        description: The machine type that will be provisioned for classic infrastructure
+        default: bx2.4x16
+        important: true
+      - name: ocp_version
+        type: string
+        description: >-
+          The version of the OpenShift cluster that should be provisioned
+          (format 4.x)
+        default: '4.8'
+        scope: global
+      - name: exists
+        type: bool
+        description: Flag indicating if the cluster already exists (true or false)
+        default: false
+        scope: module
+      - name: disable_public_endpoint
+        type: bool
+        description: Flag indicating that the public endpoint should be disabled
+        default: false
+      - name: name_prefix
+        type: string
+        description: >-
+          The prefix name for the service. If not provided it will default to
+          the resource group name
+        default: ''
+        scope: global
+      - name: ocp_entitlement
+        type: string
+        description: Value that is applied to the entitlements for OCP cluster provisioning
+        default: cloud_pak
+      - name: force_delete_storage
+        type: bool
+        description: >-
+          Attribute to force the removal of persistent storage associtated with
+          the cluster
+        default: false
+      - name: tags
+        type: list(string)
+        default: []
+        description: Tags that should be added to the instance
+      - name: vpc_name
+        type: string
+        description: Name of the VPC instance that will be used
+        moduleRef:
+          id: subnets
+          output: vpc_name
+      - name: vpc_subnet_count
+        type: number
+        description: Number of vpc subnets
+        moduleRef:
+          id: subnets
+          output: count
+      - name: vpc_subnets
+        type: |-
+          list(object({
+              label = string
+              id    = string
+              zone  = string
+            }))
+        description: List of subnets with labels
+        moduleRef:
+          id: subnets
+          output: subnets
+      - name: cos_id
+        type: string
+        description: The crn of the COS instance that will be used with the OCP instance
+        moduleRef:
+          id: cos
+          output: id
+      - name: kms_enabled
+        type: bool
+        description: Flag indicating that kms encryption should be enabled for this cluster
+        default: false
+      - name: kms_id
+        type: string
+        description: The crn of the KMS instance that will be used to encrypt the cluster.
+        default: 'null'
+        moduleRef:
+          id: kms_key
+          output: kms_id
+        optional: true
+      - name: kms_key_id
+        type: string
+        description: >-
+          The id of the root key in the KMS instance that will be used to
+          encrypt the cluster.
+        default: 'null'
+        moduleRef:
+          id: kms_key
+          output: id
+        optional: true
+      - name: kms_private_endpoint
+        type: bool
+        description: >-
+          Flag indicating that the private endpoint should be used to connect
+          the KMS system to the cluster.
+        default: true
+      - name: login
+        type: bool
+        description: >-
+          Flag indicating that after the cluster is provisioned, the module
+          should log into the cluster
+        default: false
+      - name: sync
+        type: string
+        description: Value used to order dependencies
+        default: ''
+        moduleRef:
+          id: sync
+          output: sync
     version: v1.13.2
     outputs:
       - name: id
