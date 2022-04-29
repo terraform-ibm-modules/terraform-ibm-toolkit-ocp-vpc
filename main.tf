@@ -31,6 +31,11 @@ locals {
       type_code = "ocp4"
       version   = "4.9"
     }
+    4.10  = {
+      type      = "openshift"
+      type_code = "ocp4"
+      version   = "4.10"
+    }
   }
   name_prefix           = var.name_prefix != "" ? var.name_prefix : var.resource_group_name
   name_list             = [local.name_prefix, "cluster"]
@@ -43,7 +48,7 @@ locals {
   substr(version, 0, 3) => "${version}_openshift"
   }
   cluster_regex         = "(${join("|", keys(local.config_values))}|ocp4).*"
-  cluster_type_cleaned  = regex(local.cluster_regex, var.ocp_version)[0] == "ocp4" ? "4.7" : regex(local.cluster_regex, var.ocp_version)[0]
+  cluster_type_cleaned  = regex(local.cluster_regex, var.ocp_version)[0] == "ocp4" ? "4.10" : regex(local.cluster_regex, var.ocp_version)[0]
   cluster_type          = lookup(local.config_values[local.cluster_type_cleaned], "type", "")
   # value should be ocp4, ocp3, or kubernetes
   cluster_type_code     = lookup(local.config_values[local.cluster_type_cleaned], "type_code", "")
