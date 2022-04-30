@@ -14,3 +14,13 @@ module "cluster" {
   vpc_subnet_count    = module.subnets.count
   cos_id              = module.cos.id
 }
+
+resource "local_file" "cluster_creds" {
+  filename = ".cluster_creds"
+  content = jsonencode({
+    server_url = module.cluster.server_url
+    username = module.cluster.username
+    password = module.cluster.password
+    token = module.cluster.token
+  })
+}
