@@ -1,42 +1,5 @@
 
 locals {
-  config_values = {
-    4.4  = {
-      type      = "openshift"
-      type_code = "ocp4"
-      version   = "4.4"
-    }
-    4.5  = {
-      type      = "openshift"
-      type_code = "ocp4"
-      version   = "4.5"
-    }
-    4.6  = {
-      type      = "openshift"
-      type_code = "ocp4"
-      version   = "4.6"
-    }
-    4.7  = {
-      type      = "openshift"
-      type_code = "ocp4"
-      version   = "4.7"
-    }
-    4.8  = {
-      type      = "openshift"
-      type_code = "ocp4"
-      version   = "4.8"
-    }
-    4.9  = {
-      type      = "openshift"
-      type_code = "ocp4"
-      version   = "4.9"
-    }
-    4.10  = {
-      type      = "openshift"
-      type_code = "ocp4"
-      version   = "4.10"
-    }
-  }
   name_prefix           = var.name_prefix != "" ? var.name_prefix : var.resource_group_name
   name_list             = [local.name_prefix, "cluster"]
   cluster_name          = var.name != "" ? var.name : join("-", local.name_list)
@@ -47,13 +10,12 @@ locals {
   for version in lookup(data.ibm_container_cluster_versions.cluster_versions, "valid_openshift_versions", []):
   substr(version, 0, 3) => "${version}_openshift"
   }
-  cluster_regex         = "(${join("|", keys(local.config_values))}|ocp4).*"
-  cluster_type_cleaned  = regex(local.cluster_regex, var.ocp_version)[0] == "ocp4" ? "4.10" : regex(local.cluster_regex, var.ocp_version)[0]
-  cluster_type          = lookup(local.config_values[local.cluster_type_cleaned], "type", "")
+  cluster_type_cleaned  = var.ocp_version != null && var.ocp_version != "" ? var.ocp_version : "4.10"
+  cluster_type          = "openshift"
   # value should be ocp4, ocp3, or kubernetes
-  cluster_type_code     = lookup(local.config_values[local.cluster_type_cleaned], "type_code", "")
-  cluster_type_tag      = local.cluster_type == "kubernetes" ? "iks" : "ocp"
-  cluster_version       = local.cluster_type == "openshift" ? "${var.ocp_version}_openshift" : ""
+  cluster_type_code     = "ocp4"
+  cluster_type_tag      = "ocp"
+  cluster_version       = "${var.ocp_version}_openshift"
   vpc_subnet_count      = var.vpc_subnet_count
   total_workers         = var.worker_count * var.vpc_subnet_count
   vpc_id                = !var.exists ? data.ibm_is_vpc.vpc[0].id : ""
@@ -238,6 +200,12 @@ resource ibm_container_vpc_cluster cluster {
       crk_id           = kms_config.value["crk_id"]
       private_endpoint = kms_config.value["private_endpoint"]
     }
+  }
+
+  timeouts {
+    create = "90m"
+    delete = "90m"
+    update = "60m"
   }
 }
 
