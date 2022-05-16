@@ -11,19 +11,19 @@ output "name" {
 output "resource_group_name" {
   value       = var.resource_group_name
   description = "Name of the resource group containing the cluster."
-  depends_on  = [data.ibm_container_vpc_cluster.config]
+  depends_on  = [data.ibm_container_cluster_config.cluster]
 }
 
 output "region" {
   value       = var.region
   description = "Region containing the cluster."
-  depends_on  = [data.ibm_container_vpc_cluster.config]
+  depends_on  = [data.ibm_container_cluster_config.cluster]
 }
 
 output "config_file_path" {
   value       = local.cluster_config
   description = "Path to the config file for the cluster."
-  depends_on  = [data.ibm_container_vpc_cluster.config]
+  depends_on  = [data.ibm_container_cluster_config.cluster]
 }
 
 output "platform" {
@@ -39,13 +39,13 @@ output "platform" {
   }
   sensitive = true
   description = "Configuration values for the cluster platform"
-  depends_on  = [data.ibm_container_vpc_cluster.config]
+  depends_on  = [data.ibm_container_cluster_config.cluster]
 }
 
 output "sync" {
   value = local.cluster_name
   description = "Value used to sync downstream modules"
-  depends_on  = [data.ibm_container_vpc_cluster.config]
+  depends_on  = [data.ibm_container_cluster_config.cluster]
 }
 
 output "total_worker_count" {
