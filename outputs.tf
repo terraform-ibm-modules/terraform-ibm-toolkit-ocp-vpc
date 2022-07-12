@@ -62,22 +62,22 @@ output "workers" {
 
 output "server_url" {
   description = "The url used to connect to the api server. If the cluster has public endpoints enabled this will be the public api server, otherwise this will be the private api server url"
-  value = data.ibm_container_vpc_cluster.config.public_service_endpoint ? data.ibm_container_vpc_cluster.config.public_service_endpoint_url : data.ibm_container_vpc_cluster.config.private_service_endpoint_url
+  value = data.external.credentials.result.server_url
 }
 
 output "username" {
   description = "The username of the admin user for the cluster"
-  value = "apikey"
+  value = data.external.credentials.result.username
 }
 
 output "password" {
   description = "The password of the admin user for the cluster"
-  value = var.ibmcloud_api_key
+  value = data.external.credentials.result.password
   sensitive = true
 }
 
 output "token" {
   description = "The admin user token used to generate the cluster"
-  value = ""
+  value = data.external.credentials.result.token
   sensitive = true
 }
