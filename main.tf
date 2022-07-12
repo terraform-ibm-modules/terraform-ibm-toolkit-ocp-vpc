@@ -221,6 +221,20 @@ resource ibm_is_security_group_rule rule_tcp_k8s {
   }
 }
 
+data external credentials {
+  depends_on = [ibm_container_vpc_cluster.cluster]
+  program = ["bash", "${path.module}/scripts/get-credentials.sh"]
+
+  query = {
+    public_endpoint = data.ibm_container_vpc_cluster.config.public_service_endpoint
+    public_server_url = data.ibm_container_vpc_cluster.config.public_service_endpoint_url
+    private_server_url = data.ibm_container_vpc_cluster.config.private_service_endpoint_url
+    username = "apikey"
+    ibmcloud_api_key = var.ibmcloud_api_key
+    token = ""
+  }
+}
+
 data ibm_container_vpc_cluster config {
   depends_on = [ibm_container_vpc_cluster.cluster, ibm_is_security_group_rule.rule_tcp_k8s]
 
