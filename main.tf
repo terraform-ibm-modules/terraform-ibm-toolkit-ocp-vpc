@@ -203,7 +203,7 @@ resource ibm_container_vpc_cluster cluster {
   }
 
   timeouts {
-    create = "90m"
+    create = "120m"
     delete = "90m"
     update = "60m"
   }
