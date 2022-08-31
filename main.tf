@@ -6,10 +6,6 @@ locals {
   server_url            = lookup(data.ibm_container_vpc_cluster.config, "public_service_endpoint_url", "")
   ingress_hostname      = lookup(data.ibm_container_vpc_cluster.config, "ingress_hostname", "")
   tls_secret            = lookup(data.ibm_container_vpc_cluster.config, "ingress_secret", "")
-  openshift_versions    = {
-  for version in lookup(data.ibm_container_cluster_versions.cluster_versions, "valid_openshift_versions", []):
-   substr(version, 0, 3) => "${version}_openshift"
-  }
   cluster_type_cleaned  = var.ocp_version != null && var.ocp_version != "" ? var.ocp_version : "4.10"
   cluster_type          = "openshift"
   # value should be ocp4, ocp3, or kubernetes
