@@ -76,3 +76,7 @@ variable "vpc_subnet_label" {
   type        = string
   default     = "cluster"
 }
+
+variable "common_tags" {
+  default = ["common1", "test"]
+}
