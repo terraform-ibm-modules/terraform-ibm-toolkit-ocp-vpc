@@ -13,6 +13,8 @@ module "cluster" {
   vpc_subnets         = module.subnets.subnets
   vpc_subnet_count    = module.subnets.count
   cos_id              = module.cos.id
+  common_tags = var.common_tags
+  tags = ["openshift"]
 }
 
 resource "local_file" "cluster_creds" {

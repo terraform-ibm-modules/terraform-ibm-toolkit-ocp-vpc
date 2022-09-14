@@ -18,7 +18,7 @@ versions:
   dependencies:
     - id: resource-group
       refs:
-        - source: github.com/cloud-native-toolkit/terraform-ibm-resource-group
+        - source: github.com/terraform-ibm-modules/terraform-ibm-toolkit-resource-group
           version: ">= 1.0.0"
     - id: cos
       refs:
@@ -26,11 +26,11 @@ versions:
           version: ">= 2.1.0"
     - id: subnets
       refs:
-        - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
+        - source: github.com/terraform-ibm-modules/terraform-ibm-toolkit-vpc-subnets
           version: ">= 1.8.0"
     - id: kms_key
       refs:
-        - source: github.com/cloud-native-toolkit/terraform-ibm-kms-key
+        - source: github.com/terraform-ibm-modules/terraform-ibm-toolkit-kms-key
           version: ">= 1.0.0"
       optional: true
     - id: sync
@@ -89,3 +89,6 @@ versions:
       moduleRef:
         id: sync
         output: sync
+    - name: common_tags
+      scope: global
+      important: true

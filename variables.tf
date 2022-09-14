@@ -136,3 +136,9 @@ variable "sync" {
   description = "Value used to order dependencies"
   default     = ""
 }
+
+variable "common_tags" {
+  type        = list(string)
+  default     = []
+  description = "Common tags that should be added to the instance"
+}
