@@ -1,5 +1,4 @@
 name: ibm-ocp-vpc
-registryId: cloud-native-toolkit/ocp-vpc/ibm
 alias: cluster
 interfaces:
 - github.com/cloud-native-toolkit/automation-modules#cluster
