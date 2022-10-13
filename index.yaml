@@ -8141,4 +8141,3 @@ versions:
     version: v1.0.0
 interfaces:
   - github.com/cloud-native-toolkit/automation-modules#cluster
-registryId: cloud-native-toolkit/ocp-vpc/ibm
