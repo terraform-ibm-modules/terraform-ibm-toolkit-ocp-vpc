@@ -6,7 +6,7 @@ terraform {
       source = "ibm-cloud/ibm"
     }
     clis = {
-      source = "cloud-native-toolkit/clis"
+      source  = "cloud-native-toolkit/clis"
     }
   }
 }
