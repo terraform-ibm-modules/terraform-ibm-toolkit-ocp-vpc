@@ -94,10 +94,8 @@ data ibm_container_cluster_versions cluster_versions {
   resource_group_id = data.ibm_resource_group.resource_group.id
 }
 
-module setup_clis {
-  source = "cloud-native-toolkit/clis/util"
-
-  clis = ["jq"]
+data clis_check clis {
+  clis = ["jq","oc"]
 }
 
 data ibm_is_vpc vpc {
@@ -229,6 +227,7 @@ data external credentials {
     username = "apikey"
     ibmcloud_api_key = var.ibmcloud_api_key
     token = ""
+    bin_dir = data.clis_check.clis.bin_dir
   }
 }
 
@@ -260,6 +259,20 @@ data ibm_container_cluster_config cluster {
   cluster_name_id   = !var.exists ? ibm_container_vpc_cluster.cluster[0].name : local.cluster_name
   resource_group_id = data.ibm_resource_group.resource_group.id
   config_dir        = data.external.dirs.result.cluster_config_dir
+}
+
+resource null_resource wait_for_iam_sync {
+  count = local.login ? 1 : 0
+  depends_on = [data.ibm_container_cluster_config.cluster]
+
+  provisioner "local-exec" {
+    command = "${path.module}/scripts/wait-for-iam-sync.sh"
+
+    environment = {
+      BIN_DIR = data.clis_check.clis.bin_dir
+      KUBECONFIG = local.cluster_config
+    }
+  }
 }
 
 data "ibm_container_vpc_cluster_worker" "workers" {
