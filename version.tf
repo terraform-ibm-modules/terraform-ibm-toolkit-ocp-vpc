@@ -6,5 +6,8 @@ terraform {
       source = "ibm-cloud/ibm"
       version = ">= 1.18"
     }
+    clis = {
+      source = "cloud-native-toolkit/clis"
+    }
   }
 }
