@@ -45,7 +45,7 @@ locals {
   workers = flatten([
     for i in range(local.total_workers) : {
       id = data.ibm_container_vpc_cluster_worker.workers[i].id
-      zone = data.ibm_container_vpc_cluster_worker.workers[i].network_interfaces[0].subnet_id
+      subnet_id = data.ibm_container_vpc_cluster_worker.workers[i].network_interfaces[0].subnet_id
     }
   ])
   tags = distinct(concat(var.common_tags, var.tags))
